@@ -3,35 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coin Flipper</title>
+    <title>Kawaii Coin Flipper ★</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="sparkles">
+        <span class="sparkle">✦</span>
+        <span class="sparkle">✧</span>
+        <span class="sparkle">★</span>
+        <span class="sparkle">✦</span>
+        <span class="sparkle">✧</span>
+        <span class="sparkle">★</span>
+        <span class="sparkle">✦</span>
+        <span class="sparkle">✧</span>
+    </div>
+
     <div class="container">
-        <h1>Coin Flipper</h1>
+        <h1>✧ Coin Flipper ✧</h1>
+        <p class="subtitle">~ Make a wish! ~</p>
 
         <div class="coin-container">
             <div class="coin" id="coin">
                 <div class="side heads">
-                    <span>HEADS</span>
+                    <span class="coin-face">★</span>
+                    <span class="coin-text">HEADS</span>
                 </div>
                 <div class="side tails">
-                    <span>TAILS</span>
+                    <span class="coin-face">♡</span>
+                    <span class="coin-text">TAILS</span>
                 </div>
             </div>
         </div>
 
-        <button class="flip-btn" id="flipBtn" onclick="flipCoin()">Flip Coin</button>
+        <button class="flip-btn" id="flipBtn" onclick="flipCoin()">
+            ✧ Flip! ✧
+        </button>
 
         <div class="result" id="result"></div>
 
         <div class="stats">
-            <h3>Statistics</h3>
-            <p>Heads: <span id="headsCount">0</span></p>
-            <p>Tails: <span id="tailsCount">0</span></p>
-            <p>Total Flips: <span id="totalFlips">0</span></p>
-            <button class="reset-btn" onclick="resetStats()">Reset Stats</button>
+            <h3>♡ Statistics ♡</h3>
+            <p>★ Heads: <span id="headsCount">0</span></p>
+            <p>♡ Tails: <span id="tailsCount">0</span></p>
+            <p>✧ Total: <span id="totalFlips">0</span></p>
+            <button class="reset-btn" onclick="resetStats()">Reset ↺</button>
         </div>
+
+        <div class="cute-mascot">( ˶ˆᗜˆ˵ )</div>
     </div>
 
     <script src="script.js"></script>
