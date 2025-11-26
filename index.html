@@ -3,32 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kawaii Coin Flipper ★ The Ultimate Flip Experience</title>
-    <meta name="description" content="The cutest coin flipper on the internet! Flip coins with beautiful animations, track your luck, earn achievements, and share with friends!">
+    <title>Fate Flipper ★ An Epic Coin Quest</title>
+    <meta name="description" content="Flip coins to decide your fate! An interactive story where every flip shapes your destiny. Save the Queen, become the King, or meet your doom!">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪙</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👑</text></svg>">
 </head>
 <body>
     <!-- Floating sparkles background -->
     <div class="sparkles" id="sparkles"></div>
-
-    <!-- Confetti container -->
     <div class="confetti-container" id="confetti"></div>
 
-    <!-- Theme toggle -->
-    <button class="theme-toggle" id="themeToggle" title="Toggle Dark Mode">
-        <span class="theme-icon">🌙</span>
-    </button>
+    <!-- Top controls -->
+    <div class="top-controls">
+        <button class="control-btn" id="themeToggle" title="Toggle Dark Mode">
+            <span class="theme-icon">🌙</span>
+        </button>
+        <button class="control-btn" id="soundToggle" title="Toggle Sound">
+            <span class="sound-icon">🔊</span>
+        </button>
+    </div>
 
-    <!-- Sound toggle -->
-    <button class="sound-toggle" id="soundToggle" title="Toggle Sound">
-        <span class="sound-icon">🔊</span>
-    </button>
+    <!-- Mode selector tabs -->
+    <div class="mode-tabs">
+        <button class="mode-tab active" data-mode="story">⚔️ Story Mode</button>
+        <button class="mode-tab" data-mode="classic">🪙 Classic Mode</button>
+    </div>
 
-    <div class="container">
+    <!-- ==================== STORY MODE ==================== -->
+    <div class="container story-container" id="storyMode">
+        <!-- Story Header -->
+        <header class="story-header">
+            <h1>⚔️ Fate Flipper ⚔️</h1>
+            <p class="story-tagline">Every flip decides your destiny</p>
+        </header>
+
+        <!-- Character Status Bar -->
+        <div class="character-status" id="characterStatus">
+            <div class="status-row">
+                <div class="status-item">
+                    <span class="status-label">Hero</span>
+                    <span class="status-value" id="heroName">Unknown</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Chapter</span>
+                    <span class="status-value" id="currentChapter">1</span>
+                </div>
+            </div>
+            <div class="status-bars">
+                <div class="bar-container">
+                    <span class="bar-label">❤️ Health</span>
+                    <div class="status-bar health-bar">
+                        <div class="bar-fill health-fill" id="healthBar" style="width: 100%"></div>
+                    </div>
+                    <span class="bar-value" id="healthValue">100/100</span>
+                </div>
+                <div class="bar-container">
+                    <span class="bar-label">⭐ Reputation</span>
+                    <div class="status-bar rep-bar">
+                        <div class="bar-fill rep-fill" id="repBar" style="width: 50%"></div>
+                    </div>
+                    <span class="bar-value" id="repValue">50/100</span>
+                </div>
+                <div class="bar-container">
+                    <span class="bar-label">💰 Gold</span>
+                    <div class="status-bar gold-bar">
+                        <div class="bar-fill gold-fill" id="goldBar" style="width: 20%"></div>
+                    </div>
+                    <span class="bar-value" id="goldValue">20</span>
+                </div>
+            </div>
+            <div class="inventory" id="inventory">
+                <span class="inv-label">🎒 Items:</span>
+                <span class="inv-items" id="invItems">None</span>
+            </div>
+        </div>
+
+        <!-- Story Scene -->
+        <div class="story-scene" id="storyScene">
+            <div class="scene-image" id="sceneImage">👤</div>
+            <div class="scene-text" id="sceneText">
+                <p>Welcome, brave adventurer...</p>
+            </div>
+        </div>
+
+        <!-- Choice Display -->
+        <div class="choice-display" id="choiceDisplay">
+            <div class="choice heads-choice">
+                <span class="choice-icon">★</span>
+                <span class="choice-label">HEADS</span>
+                <span class="choice-text" id="headsChoice">Brave path</span>
+            </div>
+            <div class="choice tails-choice">
+                <span class="choice-icon">♡</span>
+                <span class="choice-label">TAILS</span>
+                <span class="choice-text" id="tailsChoice">Cautious path</span>
+            </div>
+        </div>
+
+        <!-- Coin Area -->
+        <div class="coin-area">
+            <div class="coin-glow"></div>
+            <div class="coin-container">
+                <div class="coin story-coin" id="storyCoin">
+                    <div class="side heads">
+                        <span class="coin-face">⚔️</span>
+                        <span class="coin-text">FATE</span>
+                    </div>
+                    <div class="side tails">
+                        <span class="coin-face">🛡️</span>
+                        <span class="coin-text">DESTINY</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Flip Button -->
+        <button class="flip-btn story-flip-btn" id="storyFlipBtn">
+            <span class="btn-sparkle">⚔️</span>
+            <span class="btn-text">Flip Your Fate!</span>
+            <span class="btn-sparkle">🛡️</span>
+        </button>
+
+        <!-- Story Progress -->
+        <div class="story-progress">
+            <div class="progress-label">Quest Progress</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="questProgress" style="width: 0%"></div>
+            </div>
+            <div class="progress-chapters" id="progressChapters"></div>
+        </div>
+
+        <!-- Story Stats -->
+        <div class="story-stats">
+            <div class="story-stat">
+                <span class="stat-icon">⚔️</span>
+                <span class="stat-label">Battles Won</span>
+                <span class="stat-value" id="battlesWon">0</span>
+            </div>
+            <div class="story-stat">
+                <span class="stat-icon">💀</span>
+                <span class="stat-label">Deaths</span>
+                <span class="stat-value" id="deaths">0</span>
+            </div>
+            <div class="story-stat">
+                <span class="stat-icon">👑</span>
+                <span class="stat-label">Endings Found</span>
+                <span class="stat-value" id="endingsFound">0/5</span>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="story-actions">
+            <button class="action-btn" id="restartStory">🔄 Restart Quest</button>
+            <button class="action-btn" id="viewEndings">📜 View Endings</button>
+        </div>
+
+        <!-- Mascot -->
+        <div class="mascot-area">
+            <div class="mascot" id="storyMascot">( •̀ᴗ•́ )و</div>
+            <div class="mascot-speech" id="storyMascotSpeech">Your fate awaits!</div>
+        </div>
+    </div>
+
+    <!-- ==================== CLASSIC MODE ==================== -->
+    <div class="container classic-container" id="classicMode" style="display: none;">
         <header class="header">
             <h1>✧ Kawaii Coin Flipper ✧</h1>
             <p class="subtitle">~ Make a wish and flip! ~</p>
@@ -197,6 +338,37 @@
             <span class="popup-icon" id="popupIcon">🏆</span>
             <span class="popup-title">Achievement Unlocked!</span>
             <span class="popup-name" id="popupName"></span>
+        </div>
+    </div>
+
+    <!-- Ending popup -->
+    <div class="ending-popup" id="endingPopup">
+        <div class="ending-content">
+            <div class="ending-icon" id="endingIcon">👑</div>
+            <h2 class="ending-title" id="endingTitle">Victory!</h2>
+            <p class="ending-text" id="endingText"></p>
+            <div class="ending-stats" id="endingStats"></div>
+            <button class="ending-btn" id="playAgainBtn">🔄 Play Again</button>
+            <button class="ending-btn secondary" id="viewAllEndingsBtn">📜 View All Endings</button>
+        </div>
+    </div>
+
+    <!-- Endings collection popup -->
+    <div class="endings-collection-popup" id="endingsCollectionPopup">
+        <div class="endings-collection-content">
+            <h2>📜 Endings Collection</h2>
+            <div class="endings-grid" id="endingsGrid"></div>
+            <button class="ending-btn" id="closeEndingsBtn">Close</button>
+        </div>
+    </div>
+
+    <!-- Name input popup -->
+    <div class="name-popup" id="namePopup">
+        <div class="name-popup-content">
+            <h2>⚔️ Begin Your Quest ⚔️</h2>
+            <p>What shall we call you, brave hero?</p>
+            <input type="text" id="heroNameInput" placeholder="Enter your name..." maxlength="20">
+            <button class="name-submit-btn" id="nameSubmitBtn">Start Adventure!</button>
         </div>
     </div>
 
