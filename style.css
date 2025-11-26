@@ -81,6 +81,21 @@ body {
 
 .control-btn.muted { opacity: 0.5; }
 
+/* Music button animation */
+#musicToggle .music-icon {
+    display: inline-block;
+    animation: music-pulse 1s ease-in-out infinite;
+}
+
+#musicToggle.muted .music-icon {
+    animation: none;
+}
+
+@keyframes music-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
 /* Mode Tabs */
 .mode-tabs {
     display: flex;

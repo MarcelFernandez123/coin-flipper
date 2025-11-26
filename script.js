@@ -11,6 +11,7 @@ let state = {
     coinTheme: 'kawaii',
     darkMode: false,
     soundEnabled: true,
+    musicEnabled: true,
     // Story mode
     story: {
         heroName: '',
@@ -683,15 +684,256 @@ const endingsCollectionPopup = document.getElementById('endingsCollectionPopup')
 const endingsGrid = document.getElementById('endingsGrid');
 const closeEndingsBtn = document.getElementById('closeEndingsBtn');
 
-// ==================== SOUND EFFECTS ====================
+// ==================== BACKGROUND MUSIC SYSTEM ====================
 let audioContext = null;
+let musicPlaying = false;
+let currentMusicNodes = [];
+let musicEnabled = true;
+let currentMusicType = null;
 
 function getAudioContext() {
     if (!audioContext) {
         audioContext = new (window.AudioContext || window.webkitAudioContext)();
     }
+    if (audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
     return audioContext;
 }
+
+// Music generator - creates procedural game music
+function startMusic(type = 'adventure') {
+    if (!musicEnabled || currentMusicType === type) return;
+
+    stopMusic();
+    currentMusicType = type;
+    musicPlaying = true;
+
+    const ctx = getAudioContext();
+
+    // Different music styles for different scenes
+    const musicStyles = {
+        adventure: {
+            tempo: 120,
+            key: [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88], // C major
+            bassPattern: [0, 0, 4, 4, 5, 5, 4, 4],
+            melodyPattern: [0, 2, 4, 2, 5, 4, 2, 0],
+            mood: 'bright'
+        },
+        battle: {
+            tempo: 160,
+            key: [220.00, 246.94, 261.63, 293.66, 329.63, 349.23, 392.00], // A minor
+            bassPattern: [0, 0, 2, 2, 3, 3, 2, 0],
+            melodyPattern: [4, 3, 2, 0, 2, 3, 4, 5],
+            mood: 'intense'
+        },
+        mystery: {
+            tempo: 80,
+            key: [196.00, 220.00, 246.94, 261.63, 293.66, 329.63, 349.23], // G minor
+            bassPattern: [0, 2, 0, 3, 0, 2, 0, 4],
+            melodyPattern: [2, 4, 3, 2, 4, 5, 4, 2],
+            mood: 'dark'
+        },
+        victory: {
+            tempo: 140,
+            key: [329.63, 369.99, 415.30, 440.00, 493.88, 554.37, 622.25], // E major
+            bassPattern: [0, 0, 3, 3, 4, 4, 3, 0],
+            melodyPattern: [0, 2, 4, 5, 4, 2, 4, 0],
+            mood: 'triumphant'
+        },
+        peaceful: {
+            tempo: 70,
+            key: [293.66, 329.63, 369.99, 392.00, 440.00, 493.88, 554.37], // D major
+            bassPattern: [0, 4, 2, 4, 0, 4, 3, 4],
+            melodyPattern: [4, 5, 4, 2, 4, 2, 0, 2],
+            mood: 'calm'
+        }
+    };
+
+    const style = musicStyles[type] || musicStyles.adventure;
+    const beatDuration = 60 / style.tempo;
+
+    // Create master gain for music volume
+    const masterGain = ctx.createGain();
+    masterGain.gain.setValueAtTime(0.15, ctx.currentTime);
+    masterGain.connect(ctx.destination);
+
+    // Bass line
+    function playBass() {
+        if (!musicPlaying) return;
+
+        style.bassPattern.forEach((note, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const filter = ctx.createBiquadFilter();
+
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(masterGain);
+
+            osc.type = 'sine';
+            osc.frequency.value = style.key[note] / 2; // One octave lower
+
+            filter.type = 'lowpass';
+            filter.frequency.value = 200;
+
+            const startTime = ctx.currentTime + (i * beatDuration);
+            gain.gain.setValueAtTime(0.3, startTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, startTime + beatDuration * 0.8);
+
+            osc.start(startTime);
+            osc.stop(startTime + beatDuration);
+
+            currentMusicNodes.push({ osc, gain });
+        });
+
+        // Loop
+        if (musicPlaying) {
+            setTimeout(playBass, style.bassPattern.length * beatDuration * 1000);
+        }
+    }
+
+    // Melody/Pad
+    function playMelody() {
+        if (!musicPlaying) return;
+
+        style.melodyPattern.forEach((note, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+
+            osc.connect(gain);
+            gain.connect(masterGain);
+
+            osc.type = style.mood === 'intense' ? 'sawtooth' : 'triangle';
+            osc.frequency.value = style.key[note];
+
+            const startTime = ctx.currentTime + (i * beatDuration * 0.5);
+            gain.gain.setValueAtTime(0, startTime);
+            gain.gain.linearRampToValueAtTime(0.08, startTime + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.01, startTime + beatDuration * 0.4);
+
+            osc.start(startTime);
+            osc.stop(startTime + beatDuration * 0.5);
+
+            currentMusicNodes.push({ osc, gain });
+        });
+
+        // Loop melody
+        if (musicPlaying) {
+            setTimeout(playMelody, style.melodyPattern.length * beatDuration * 0.5 * 1000);
+        }
+    }
+
+    // Ambient pad for atmosphere
+    function playPad() {
+        if (!musicPlaying) return;
+
+        const osc1 = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
+        const gain = ctx.createGain();
+        const filter = ctx.createBiquadFilter();
+
+        osc1.connect(filter);
+        osc2.connect(filter);
+        filter.connect(gain);
+        gain.connect(masterGain);
+
+        osc1.type = 'sine';
+        osc2.type = 'sine';
+        osc1.frequency.value = style.key[0];
+        osc2.frequency.value = style.key[4];
+
+        filter.type = 'lowpass';
+        filter.frequency.value = style.mood === 'dark' ? 400 : 800;
+
+        gain.gain.setValueAtTime(0, ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.06, ctx.currentTime + 2);
+        gain.gain.setValueAtTime(0.06, ctx.currentTime + 6);
+        gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 8);
+
+        osc1.start(ctx.currentTime);
+        osc2.start(ctx.currentTime);
+        osc1.stop(ctx.currentTime + 8);
+        osc2.stop(ctx.currentTime + 8);
+
+        currentMusicNodes.push({ osc: osc1, gain }, { osc: osc2, gain });
+
+        // Loop pad
+        if (musicPlaying) {
+            setTimeout(playPad, 7500);
+        }
+    }
+
+    // Start all layers
+    playBass();
+    setTimeout(playMelody, beatDuration * 2 * 1000);
+    playPad();
+}
+
+function stopMusic() {
+    musicPlaying = false;
+    currentMusicType = null;
+
+    // Stop all current music nodes
+    currentMusicNodes.forEach(node => {
+        try {
+            if (node.gain) {
+                node.gain.gain.setValueAtTime(0, getAudioContext().currentTime);
+            }
+            if (node.osc && node.osc.stop) {
+                node.osc.stop(getAudioContext().currentTime + 0.1);
+            }
+        } catch (e) {}
+    });
+    currentMusicNodes = [];
+}
+
+function toggleMusic() {
+    state.musicEnabled = !state.musicEnabled;
+    musicEnabled = state.musicEnabled;
+    const musicToggle = document.getElementById('musicToggle');
+    if (musicToggle) {
+        musicToggle.querySelector('.music-icon').textContent = musicEnabled ? '🎵' : '🔇';
+        musicToggle.classList.toggle('muted', !musicEnabled);
+    }
+
+    if (musicEnabled) {
+        // Start appropriate music based on current scene
+        const scene = getCurrentScene();
+        if (scene) {
+            playSceneMusic(scene);
+        } else {
+            startMusic('adventure');
+        }
+    } else {
+        stopMusic();
+    }
+
+    saveState();
+}
+
+function playSceneMusic(scene) {
+    if (!musicEnabled) return;
+
+    // Determine music type based on scene
+    let musicType = 'adventure';
+
+    if (scene.soundType === 'battle' || scene.sceneType === 'battle') {
+        musicType = 'battle';
+    } else if (scene.soundType === 'magic' || scene.sceneType === 'magic') {
+        musicType = 'mystery';
+    } else if (scene.sceneType === 'cave' || scene.sceneType === 'swamp' || scene.sceneType === 'tower') {
+        musicType = 'mystery';
+    } else if (scene.sceneType === 'village' || scene.sceneType === 'lake') {
+        musicType = 'peaceful';
+    } else if (scene.isEnding) {
+        musicType = 'victory';
+    }
+
+    startMusic(musicType);
+}
+
+// ==================== SOUND EFFECTS ====================
 
 function createSound(frequency, duration, type = 'sine') {
     return () => {
@@ -960,6 +1202,7 @@ function init() {
     loadState();
     createSparkles();
     applyTheme();
+    applyMusicState();
     setupEventListeners();
     initCharacterCreator();
 
@@ -977,15 +1220,38 @@ function init() {
     updateHistoryDisplay();
 }
 
+function applyMusicState() {
+    musicEnabled = state.musicEnabled !== false; // Default to true
+    const musicToggle = document.getElementById('musicToggle');
+    if (musicToggle) {
+        musicToggle.querySelector('.music-icon').textContent = musicEnabled ? '🎵' : '🔇';
+        musicToggle.classList.toggle('muted', !musicEnabled);
+    }
+}
+
 function setupEventListeners() {
     // Mode tabs
     document.querySelectorAll('.mode-tab').forEach(tab => {
         tab.addEventListener('click', () => switchMode(tab.dataset.mode));
     });
 
-    // Theme and sound toggles
+    // Theme, sound, and music toggles
     themeToggle.addEventListener('click', toggleDarkMode);
     soundToggle.addEventListener('click', toggleSound);
+    document.getElementById('musicToggle').addEventListener('click', toggleMusic);
+
+    // Start music on first interaction (browsers require user interaction)
+    document.addEventListener('click', function startMusicOnInteraction() {
+        if (musicEnabled && !musicPlaying) {
+            const scene = getCurrentScene();
+            if (scene) {
+                playSceneMusic(scene);
+            } else {
+                startMusic('adventure');
+            }
+        }
+        document.removeEventListener('click', startMusicOnInteraction);
+    }, { once: true });
 
     // Story mode
     storyFlipBtn.addEventListener('click', storyFlip);
@@ -1305,6 +1571,9 @@ function updateStoryDisplay() {
     if (scene.sceneType) {
         storyScene.classList.add('scene-' + scene.sceneType);
     }
+
+    // Update music based on scene
+    playSceneMusic(scene);
 
     // Scene
     sceneImage.textContent = scene.image;
