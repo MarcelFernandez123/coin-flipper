@@ -42,14 +42,19 @@
 
         <!-- Character Status Bar -->
         <div class="character-status" id="characterStatus">
-            <div class="status-row">
-                <div class="status-item">
-                    <span class="status-label">Hero</span>
-                    <span class="status-value" id="heroName">Unknown</span>
+            <div class="status-row with-avatar">
+                <div class="mini-avatar" id="miniAvatar">
+                    <svg viewBox="0 0 100 120" class="mini-avatar-svg" id="miniAvatarSvg"></svg>
                 </div>
-                <div class="status-item">
-                    <span class="status-label">Chapter</span>
-                    <span class="status-value" id="currentChapter">1</span>
+                <div class="status-info">
+                    <div class="status-item">
+                        <span class="status-label">Hero</span>
+                        <span class="status-value" id="heroName">Unknown</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Chapter</span>
+                        <span class="status-value" id="currentChapter">1</span>
+                    </div>
                 </div>
             </div>
             <div class="status-bars">
@@ -362,13 +367,67 @@
         </div>
     </div>
 
-    <!-- Name input popup -->
+    <!-- Character Creator popup -->
     <div class="name-popup" id="namePopup">
-        <div class="name-popup-content">
-            <h2>⚔️ Begin Your Quest ⚔️</h2>
-            <p>What shall we call you, brave hero?</p>
-            <input type="text" id="heroNameInput" placeholder="Enter your name..." maxlength="20">
-            <button class="name-submit-btn" id="nameSubmitBtn">Start Adventure!</button>
+        <div class="name-popup-content character-creator">
+            <h2>⚔️ Create Your Hero ⚔️</h2>
+
+            <!-- Avatar Preview -->
+            <div class="avatar-preview" id="avatarPreview">
+                <svg viewBox="0 0 100 120" class="avatar-svg" id="avatarSvg">
+                    <!-- Will be rendered by JS -->
+                </svg>
+            </div>
+
+            <!-- Character Options -->
+            <div class="creator-options">
+                <!-- Gender -->
+                <div class="option-group">
+                    <label>Gender</label>
+                    <div class="option-buttons" id="genderOptions">
+                        <button class="option-btn active" data-option="gender" data-value="male">♂️ Male</button>
+                        <button class="option-btn" data-option="gender" data-value="female">♀️ Female</button>
+                    </div>
+                </div>
+
+                <!-- Skin Tone -->
+                <div class="option-group">
+                    <label>Skin Tone</label>
+                    <div class="color-options" id="skinOptions"></div>
+                </div>
+
+                <!-- Hair Style -->
+                <div class="option-group">
+                    <label>Hair Style</label>
+                    <div class="option-buttons hair-buttons" id="hairStyleOptions"></div>
+                </div>
+
+                <!-- Hair Color -->
+                <div class="option-group">
+                    <label>Hair Color</label>
+                    <div class="color-options" id="hairColorOptions"></div>
+                </div>
+
+                <!-- Eye Color -->
+                <div class="option-group">
+                    <label>Eye Color</label>
+                    <div class="color-options" id="eyeColorOptions"></div>
+                </div>
+
+                <!-- Outfit/Class -->
+                <div class="option-group">
+                    <label>Class</label>
+                    <div class="option-buttons class-buttons" id="outfitOptions"></div>
+                </div>
+            </div>
+
+            <!-- Name Input -->
+            <div class="name-input-section">
+                <label>Hero Name</label>
+                <input type="text" id="heroNameInput" placeholder="Enter your name..." maxlength="20">
+            </div>
+
+            <button class="name-submit-btn" id="nameSubmitBtn">⚔️ Begin Adventure! ⚔️</button>
         </div>
     </div>
 

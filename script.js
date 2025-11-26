@@ -24,8 +24,60 @@ let state = {
         battlesWon: 0,
         deaths: 0,
         endingsFound: [],
-        flags: {}
+        flags: {},
+        // Character avatar
+        avatar: {
+            gender: 'male',
+            skinTone: 0,
+            hairStyle: 0,
+            hairColor: 0,
+            eyeColor: 0,
+            outfit: 0
+        }
     }
+};
+
+// ==================== CHARACTER AVATAR OPTIONS ====================
+const AVATAR_OPTIONS = {
+    genders: ['male', 'female'],
+    skinTones: ['#FFDFC4', '#F0D5BE', '#D1A684', '#A67C52', '#8D5524', '#5C3317'],
+    hairStyles: {
+        male: ['short', 'spiky', 'long', 'ponytail', 'mohawk', 'bald'],
+        female: ['long', 'ponytail', 'short', 'twintails', 'braid', 'bun']
+    },
+    hairColors: ['#2C1810', '#8B4513', '#DAA520', '#DC143C', '#4169E1', '#9932CC', '#FF69B4', '#FFFFFF'],
+    eyeColors: ['#8B4513', '#228B22', '#4169E1', '#9932CC', '#DC143C', '#FFD700'],
+    outfits: {
+        male: ['knight', 'mage', 'ranger', 'rogue', 'noble', 'peasant'],
+        female: ['knight', 'mage', 'ranger', 'rogue', 'noble', 'peasant']
+    },
+    outfitColors: {
+        knight: '#708090',
+        mage: '#4B0082',
+        ranger: '#228B22',
+        rogue: '#2F2F2F',
+        noble: '#FFD700',
+        peasant: '#8B4513'
+    }
+};
+
+// ==================== SCENE IMAGE DATA ====================
+const SCENE_IMAGES = {
+    // Locations
+    castle: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400&h=200&fit=crop',
+    forest: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=400&h=200&fit=crop',
+    mountain: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400&h=200&fit=crop',
+    cave: 'https://images.unsplash.com/photo-1586348943529-beaae6c28db9?w=400&h=200&fit=crop',
+    tower: 'https://images.unsplash.com/photo-1514539079130-25950c84af65?w=400&h=200&fit=crop',
+    lake: 'https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=400&h=200&fit=crop',
+    swamp: 'https://images.unsplash.com/photo-1541675154750-0444c7d51e8e?w=400&h=200&fit=crop',
+    village: 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=400&h=200&fit=crop',
+    shrine: 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=400&h=200&fit=crop',
+    throne: 'https://images.unsplash.com/photo-1577083552792-a0d461cb1dd6?w=400&h=200&fit=crop',
+    battle: 'https://images.unsplash.com/photo-1560942485-b2a11cc13456?w=400&h=200&fit=crop',
+    magic: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400&h=200&fit=crop&sat=-100&con=1.2',
+    night: 'https://images.unsplash.com/photo-1507400492013-162706c8c05e?w=400&h=200&fit=crop',
+    victory: 'https://images.unsplash.com/photo-1533228876829-65c94e7b5025?w=400&h=200&fit=crop'
 };
 
 // ==================== STORY DATA ====================
@@ -38,6 +90,8 @@ const STORY = {
                 {
                     id: "intro",
                     image: "🏰",
+                    sceneType: "castle",
+                    soundType: "dramatic",
                     text: "The Kingdom of Luminara is in peril! The evil Sorcerer Malachar has kidnapped Queen Celestia and locked her in the Dark Tower. You are {heroName}, a humble villager who must answer the call to adventure.",
                     headsChoice: "Accept the quest bravely",
                     tailsChoice: "Seek more information first",
@@ -47,6 +101,8 @@ const STORY = {
                 {
                     id: "brave_start",
                     image: "🗡️",
+                    sceneType: "village",
+                    soundType: "item",
                     text: "At the village armory, the blacksmith offers you a choice of weapons.",
                     headsChoice: "Take the Sword of Light",
                     tailsChoice: "Take the Shield of Dawn",
@@ -56,6 +112,8 @@ const STORY = {
                 {
                     id: "cautious_start",
                     image: "📜",
+                    sceneType: "village",
+                    soundType: "dramatic",
                     text: "The elder tells you of two paths: the Enchanted Forest or the Mountain Pass.",
                     headsChoice: "Take the Forest path",
                     tailsChoice: "Take the Mountain path",
@@ -65,6 +123,8 @@ const STORY = {
                 {
                     id: "forest_entrance",
                     image: "🌲",
+                    sceneType: "forest",
+                    soundType: "dramatic",
                     text: "The Enchanted Forest looms before you. Strange lights flicker between the ancient trees. You hear a cry for help nearby!",
                     headsChoice: "Rush to help immediately",
                     tailsChoice: "Approach cautiously",
@@ -74,6 +134,8 @@ const STORY = {
                 {
                     id: "mountain_entrance",
                     image: "⛰️",
+                    sceneType: "mountain",
+                    soundType: "dramatic",
                     text: "The mountain path is steep and dangerous. You spot a cave that could provide shelter, but also hear rumors of a dragon.",
                     headsChoice: "Explore the cave",
                     tailsChoice: "Continue on the path",
@@ -89,92 +151,112 @@ const STORY = {
                 {
                     id: "fairy_rescue",
                     image: "🧚",
+                    sceneType: "forest",
+                    soundType: "magic",
                     text: "A tiny fairy named Luna is trapped in a spider's web! The giant spider approaches...",
                     headsChoice: "Fight the spider!",
                     tailsChoice: "Distract it and free Luna",
-                    headsResult: { nextScene: "spider_battle", text: "You draw your weapon and charge!" },
-                    tailsResult: { nextScene: "fairy_freed", reputation: 10, item: "Fairy Dust", text: "Luna is freed and grants you magical fairy dust!" }
+                    headsResult: { nextScene: "spider_battle", text: "You draw your weapon and charge!", soundEffect: "battle" },
+                    tailsResult: { nextScene: "fairy_freed", reputation: 10, item: "Fairy Dust", text: "Luna is freed and grants you magical fairy dust!", soundEffect: "magic" }
                 },
                 {
                     id: "fairy_trap",
                     image: "🕸️",
+                    sceneType: "forest",
+                    soundType: "battle",
                     text: "It's an ambush! Goblins spring from the shadows, but your caution gave you time to react.",
                     headsChoice: "Stand and fight",
                     tailsChoice: "Try to negotiate",
-                    headsResult: { nextScene: "goblin_battle", text: "You prepare for combat!" },
+                    headsResult: { nextScene: "goblin_battle", text: "You prepare for combat!", soundEffect: "battle" },
                     tailsResult: { nextScene: "goblin_deal", gold: -10, text: "The goblins agree to let you pass... for a price." }
                 },
                 {
                     id: "spider_battle",
                     image: "🕷️",
+                    sceneType: "battle",
+                    soundType: "battle",
                     text: "The giant spider attacks! Its venomous fangs gleam in the dim light.",
                     headsChoice: "Aim for its eyes",
                     tailsChoice: "Go for its legs",
-                    headsResult: { nextScene: "fairy_freed", battlesWon: 1, reputation: 20, text: "Critical hit! The spider is defeated!" },
-                    tailsResult: { nextScene: "fairy_freed", battlesWon: 1, health: -20, text: "You win but take some damage from its venom." }
+                    headsResult: { nextScene: "fairy_freed", battlesWon: 1, reputation: 20, text: "Critical hit! The spider is defeated!", soundEffect: "victory" },
+                    tailsResult: { nextScene: "fairy_freed", battlesWon: 1, health: -20, text: "You win but take some damage from its venom.", soundEffect: "damage" }
                 },
                 {
                     id: "fairy_freed",
                     image: "✨",
+                    sceneType: "magic",
+                    soundType: "magic",
                     text: "Luna the fairy is grateful! 'I will help you on your quest,' she says. 'But first, you must choose your path forward.'",
                     headsChoice: "Go to the Mystic Lake",
                     tailsChoice: "Visit the Witch's Hut",
-                    headsResult: { nextChapter: 2, nextScene: "mystic_lake", text: "Luna guides you to the magical lake." },
-                    tailsResult: { nextChapter: 2, nextScene: "witch_hut", text: "Perhaps the witch has useful knowledge..." }
+                    headsResult: { nextChapter: 2, nextScene: "mystic_lake", text: "Luna guides you to the magical lake.", soundEffect: "chapter" },
+                    tailsResult: { nextChapter: 2, nextScene: "witch_hut", text: "Perhaps the witch has useful knowledge...", soundEffect: "chapter" }
                 },
                 {
                     id: "goblin_battle",
                     image: "👺",
+                    sceneType: "battle",
+                    soundType: "battle",
                     text: "Five goblins surround you! This will be tough...",
                     headsChoice: "Use a battle cry to intimidate",
                     tailsChoice: "Fight defensively",
-                    headsResult: { nextScene: "goblin_victory", battlesWon: 1, reputation: 15, text: "Your fierce cry scatters three goblins! You defeat the rest." },
-                    tailsResult: { nextScene: "goblin_victory", battlesWon: 1, health: -15, text: "You win but sustain injuries." }
+                    headsResult: { nextScene: "goblin_victory", battlesWon: 1, reputation: 15, text: "Your fierce cry scatters three goblins! You defeat the rest.", soundEffect: "victory" },
+                    tailsResult: { nextScene: "goblin_victory", battlesWon: 1, health: -15, text: "You win but sustain injuries.", soundEffect: "damage" }
                 },
                 {
                     id: "goblin_deal",
                     image: "💰",
+                    sceneType: "forest",
+                    soundType: "item",
                     text: "The goblin chief laughs. 'Smart human! We tell you secret - witch in forest knows way to Dark Tower.'",
                     headsChoice: "Thank them and leave",
                     tailsChoice: "Ask for more information",
-                    headsResult: { nextChapter: 2, nextScene: "witch_hut", text: "You head to find the witch." },
-                    tailsResult: { nextChapter: 2, nextScene: "witch_hut", gold: -5, item: "Goblin Map", text: "For more gold, they give you a map!" }
+                    headsResult: { nextChapter: 2, nextScene: "witch_hut", text: "You head to find the witch.", soundEffect: "chapter" },
+                    tailsResult: { nextChapter: 2, nextScene: "witch_hut", gold: -5, item: "Goblin Map", text: "For more gold, they give you a map!", soundEffect: "item" }
                 },
                 {
                     id: "goblin_victory",
                     image: "⚔️",
+                    sceneType: "battle",
+                    soundType: "victory",
                     text: "The goblins flee! Among their belongings you find a crude map.",
                     headsChoice: "Follow the map",
                     tailsChoice: "Ignore it and continue",
-                    headsResult: { nextChapter: 2, nextScene: "hidden_shrine", item: "Goblin Map", text: "The map reveals a hidden location!" },
-                    tailsResult: { nextChapter: 2, nextScene: "witch_hut", text: "You continue on the main path." }
+                    headsResult: { nextChapter: 2, nextScene: "hidden_shrine", item: "Goblin Map", text: "The map reveals a hidden location!", soundEffect: "item" },
+                    tailsResult: { nextChapter: 2, nextScene: "witch_hut", text: "You continue on the main path.", soundEffect: "chapter" }
                 },
                 {
                     id: "dragon_cave",
                     image: "🐉",
+                    sceneType: "cave",
+                    soundType: "dragon",
                     text: "Deep in the cave, you find a young dragon! It's injured and looks at you with fear.",
                     headsChoice: "Help heal the dragon",
                     tailsChoice: "Leave it alone",
-                    headsResult: { nextScene: "dragon_friend", reputation: 25, item: "Dragon Scale", text: "The dragon becomes your ally!" },
+                    headsResult: { nextScene: "dragon_friend", reputation: 25, item: "Dragon Scale", text: "The dragon becomes your ally!", soundEffect: "dragon" },
                     tailsResult: { nextChapter: 2, nextScene: "mountain_pass", text: "You leave the cave quietly." }
                 },
                 {
                     id: "dragon_friend",
                     image: "🐲",
+                    sceneType: "cave",
+                    soundType: "dragon",
                     text: "The dragon, named Ember, is grateful! 'I will aid you, brave one. I know where the Dark Tower lies.'",
                     headsChoice: "Fly directly to the tower",
                     tailsChoice: "Gather allies first",
-                    headsResult: { nextChapter: 3, nextScene: "tower_direct", text: "Ember takes flight toward the tower!" },
-                    tailsResult: { nextChapter: 2, nextScene: "mystic_lake", text: "Wisdom dictates you need more help." }
+                    headsResult: { nextChapter: 3, nextScene: "tower_direct", text: "Ember takes flight toward the tower!", soundEffect: "dragon" },
+                    tailsResult: { nextChapter: 2, nextScene: "mystic_lake", text: "Wisdom dictates you need more help.", soundEffect: "chapter" }
                 },
                 {
                     id: "mountain_pass",
                     image: "🏔️",
+                    sceneType: "mountain",
+                    soundType: "dramatic",
                     text: "The mountain pass is treacherous. You encounter a traveling merchant.",
                     headsChoice: "Trade with the merchant",
                     tailsChoice: "Continue past them",
-                    headsResult: { nextChapter: 2, nextScene: "merchant_trade", text: "The merchant has interesting wares..." },
-                    tailsResult: { nextChapter: 2, nextScene: "witch_hut", text: "You press onward." }
+                    headsResult: { nextChapter: 2, nextScene: "merchant_trade", text: "The merchant has interesting wares...", soundEffect: "item" },
+                    tailsResult: { nextChapter: 2, nextScene: "witch_hut", text: "You press onward.", soundEffect: "chapter" }
                 }
             ]
         },
@@ -602,11 +684,20 @@ const endingsGrid = document.getElementById('endingsGrid');
 const closeEndingsBtn = document.getElementById('closeEndingsBtn');
 
 // ==================== SOUND EFFECTS ====================
+let audioContext = null;
+
+function getAudioContext() {
+    if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    return audioContext;
+}
+
 function createSound(frequency, duration, type = 'sine') {
     return () => {
         if (!state.soundEnabled) return;
         try {
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const audioCtx = getAudioContext();
             const oscillator = audioCtx.createOscillator();
             const gainNode = audioCtx.createGain();
             oscillator.connect(gainNode);
@@ -623,10 +714,12 @@ function createSound(frequency, duration, type = 'sine') {
 
 const playFlipSound = createSound(800, 0.1, 'square');
 const playResultSound = createSound(523, 0.2, 'sine');
+
+// Victory fanfare
 const playVictorySound = () => {
     if (!state.soundEnabled) return;
     try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const audioCtx = getAudioContext();
         [523, 659, 784, 1047].forEach((freq, i) => {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
@@ -642,18 +735,240 @@ const playVictorySound = () => {
     } catch (e) {}
 };
 
+// Battle sword clash sound
+const playBattleSound = () => {
+    if (!state.soundEnabled) return;
+    try {
+        const audioCtx = getAudioContext();
+        // Metal clash
+        for (let i = 0; i < 3; i++) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            const filter = audioCtx.createBiquadFilter();
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = 'sawtooth';
+            osc.frequency.value = 800 + Math.random() * 400;
+            filter.type = 'highpass';
+            filter.frequency.value = 1000;
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime + i * 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + i * 0.1 + 0.15);
+            osc.start(audioCtx.currentTime + i * 0.1);
+            osc.stop(audioCtx.currentTime + i * 0.1 + 0.15);
+        }
+    } catch (e) {}
+};
+
+// Magic spell sound
+const playMagicSound = () => {
+    if (!state.soundEnabled) return;
+    try {
+        const audioCtx = getAudioContext();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(800, audioCtx.currentTime + 0.3);
+        osc.frequency.exponentialRampToValueAtTime(400, audioCtx.currentTime + 0.5);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
+        osc.start(audioCtx.currentTime);
+        osc.stop(audioCtx.currentTime + 0.6);
+        // Sparkle overlay
+        setTimeout(() => {
+            const osc2 = audioCtx.createOscillator();
+            const gain2 = audioCtx.createGain();
+            osc2.connect(gain2);
+            gain2.connect(audioCtx.destination);
+            osc2.type = 'sine';
+            osc2.frequency.value = 1200;
+            gain2.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain2.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+            osc2.start(audioCtx.currentTime);
+            osc2.stop(audioCtx.currentTime + 0.2);
+        }, 100);
+    } catch (e) {}
+};
+
+// Damage/hurt sound
+const playDamageSound = () => {
+    if (!state.soundEnabled) return;
+    try {
+        const audioCtx = getAudioContext();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+        osc.start(audioCtx.currentTime);
+        osc.stop(audioCtx.currentTime + 0.3);
+    } catch (e) {}
+};
+
+// Item pickup/gold sound
+const playItemSound = () => {
+    if (!state.soundEnabled) return;
+    try {
+        const audioCtx = getAudioContext();
+        [880, 1100, 1320].forEach((freq, i) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime + i * 0.08);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + i * 0.08 + 0.15);
+            osc.start(audioCtx.currentTime + i * 0.08);
+            osc.stop(audioCtx.currentTime + i * 0.08 + 0.15);
+        });
+    } catch (e) {}
+};
+
+// Dramatic reveal/story progression sound
+const playDramaticSound = () => {
+    if (!state.soundEnabled) return;
+    try {
+        const audioCtx = getAudioContext();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+        osc.frequency.setValueAtTime(277, audioCtx.currentTime + 0.2);
+        osc.frequency.setValueAtTime(330, audioCtx.currentTime + 0.4);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime + 0.5);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+        osc.start(audioCtx.currentTime);
+        osc.stop(audioCtx.currentTime + 0.8);
+    } catch (e) {}
+};
+
+// Death/failure sound
+const playDeathSound = () => {
+    if (!state.soundEnabled) return;
+    try {
+        const audioCtx = getAudioContext();
+        [200, 180, 150, 100].forEach((freq, i) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime + i * 0.2);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + i * 0.2 + 0.3);
+            osc.start(audioCtx.currentTime + i * 0.2);
+            osc.stop(audioCtx.currentTime + i * 0.2 + 0.3);
+        });
+    } catch (e) {}
+};
+
+// Chapter transition sound
+const playChapterSound = () => {
+    if (!state.soundEnabled) return;
+    try {
+        const audioCtx = getAudioContext();
+        // Epic chord
+        [261, 329, 392, 523].forEach((freq) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime + 0.5);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.2);
+            osc.start(audioCtx.currentTime);
+            osc.stop(audioCtx.currentTime + 1.2);
+        });
+    } catch (e) {}
+};
+
+// Dragon roar sound
+const playDragonSound = () => {
+    if (!state.soundEnabled) return;
+    try {
+        const audioCtx = getAudioContext();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        const filter = audioCtx.createBiquadFilter();
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'sawtooth';
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(500, audioCtx.currentTime);
+        filter.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.8);
+        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(60, audioCtx.currentTime + 0.8);
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+        osc.start(audioCtx.currentTime);
+        osc.stop(audioCtx.currentTime + 0.8);
+    } catch (e) {}
+};
+
+// Ending fanfare
+const playEndingFanfare = () => {
+    if (!state.soundEnabled) return;
+    try {
+        const audioCtx = getAudioContext();
+        const notes = [523, 587, 659, 698, 784, 880, 988, 1047];
+        notes.forEach((freq, i) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime + i * 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + i * 0.1 + 0.3);
+            osc.start(audioCtx.currentTime + i * 0.1);
+            osc.stop(audioCtx.currentTime + i * 0.1 + 0.3);
+        });
+        // Final chord
+        setTimeout(() => {
+            [523, 659, 784, 1047].forEach((freq) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1);
+                osc.start(audioCtx.currentTime);
+                osc.stop(audioCtx.currentTime + 1);
+            });
+        }, 800);
+    } catch (e) {}
+};
+
 // ==================== INITIALIZATION ====================
 function init() {
     loadState();
     createSparkles();
     applyTheme();
     setupEventListeners();
+    initCharacterCreator();
 
     // Check if story needs to start
     if (!state.story.heroName) {
         namePopup.classList.add('show');
     } else {
         updateStoryDisplay();
+        updateMiniAvatar();
     }
 
     // Initialize classic mode too
@@ -739,8 +1054,217 @@ function submitHeroName() {
     state.story.scene = 0;
     namePopup.classList.remove('show');
     updateStoryDisplay();
+    updateMiniAvatar();
     saveState();
+    playDramaticSound();
     showStoryMascotMessage(`Welcome, ${name}! Your adventure begins!`);
+}
+
+// ==================== CHARACTER CREATOR ====================
+function initCharacterCreator() {
+    // Initialize skin tone options
+    const skinOptions = document.getElementById('skinOptions');
+    AVATAR_OPTIONS.skinTones.forEach((color, index) => {
+        const btn = document.createElement('button');
+        btn.className = `color-btn ${index === state.story.avatar.skinTone ? 'active' : ''}`;
+        btn.style.backgroundColor = color;
+        btn.dataset.option = 'skinTone';
+        btn.dataset.value = index;
+        btn.addEventListener('click', () => selectColorOption('skinTone', index));
+        skinOptions.appendChild(btn);
+    });
+
+    // Initialize hair color options
+    const hairColorOptions = document.getElementById('hairColorOptions');
+    AVATAR_OPTIONS.hairColors.forEach((color, index) => {
+        const btn = document.createElement('button');
+        btn.className = `color-btn ${index === state.story.avatar.hairColor ? 'active' : ''}`;
+        btn.style.backgroundColor = color;
+        btn.dataset.option = 'hairColor';
+        btn.dataset.value = index;
+        btn.addEventListener('click', () => selectColorOption('hairColor', index));
+        hairColorOptions.appendChild(btn);
+    });
+
+    // Initialize eye color options
+    const eyeColorOptions = document.getElementById('eyeColorOptions');
+    AVATAR_OPTIONS.eyeColors.forEach((color, index) => {
+        const btn = document.createElement('button');
+        btn.className = `color-btn ${index === state.story.avatar.eyeColor ? 'active' : ''}`;
+        btn.style.backgroundColor = color;
+        btn.dataset.option = 'eyeColor';
+        btn.dataset.value = index;
+        btn.addEventListener('click', () => selectColorOption('eyeColor', index));
+        eyeColorOptions.appendChild(btn);
+    });
+
+    // Initialize gender buttons
+    document.querySelectorAll('[data-option="gender"]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('[data-option="gender"]').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            state.story.avatar.gender = btn.dataset.value;
+            state.story.avatar.hairStyle = 0;
+            updateHairStyleOptions();
+            updateOutfitOptions();
+            renderAvatar();
+        });
+    });
+
+    updateHairStyleOptions();
+    updateOutfitOptions();
+    renderAvatar();
+}
+
+function updateHairStyleOptions() {
+    const hairStyleOptions = document.getElementById('hairStyleOptions');
+    hairStyleOptions.innerHTML = '';
+    const gender = state.story.avatar.gender;
+    const styles = AVATAR_OPTIONS.hairStyles[gender];
+
+    styles.forEach((style, index) => {
+        const btn = document.createElement('button');
+        btn.className = `option-btn ${index === state.story.avatar.hairStyle ? 'active' : ''}`;
+        btn.textContent = style.charAt(0).toUpperCase() + style.slice(1);
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('#hairStyleOptions .option-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            state.story.avatar.hairStyle = index;
+            renderAvatar();
+        });
+        hairStyleOptions.appendChild(btn);
+    });
+}
+
+function updateOutfitOptions() {
+    const outfitOptions = document.getElementById('outfitOptions');
+    outfitOptions.innerHTML = '';
+    const gender = state.story.avatar.gender;
+    const outfits = AVATAR_OPTIONS.outfits[gender];
+
+    const classIcons = {
+        knight: '⚔️',
+        mage: '🔮',
+        ranger: '🏹',
+        rogue: '🗡️',
+        noble: '👑',
+        peasant: '🌾'
+    };
+
+    outfits.forEach((outfit, index) => {
+        const btn = document.createElement('button');
+        btn.className = `option-btn ${index === state.story.avatar.outfit ? 'active' : ''}`;
+        btn.textContent = `${classIcons[outfit]} ${outfit.charAt(0).toUpperCase() + outfit.slice(1)}`;
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('#outfitOptions .option-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            state.story.avatar.outfit = index;
+            renderAvatar();
+        });
+        outfitOptions.appendChild(btn);
+    });
+}
+
+function selectColorOption(option, index) {
+    state.story.avatar[option] = index;
+    const container = document.getElementById(option === 'skinTone' ? 'skinOptions' :
+                      option === 'hairColor' ? 'hairColorOptions' : 'eyeColorOptions');
+    container.querySelectorAll('.color-btn').forEach((btn, i) => {
+        btn.classList.toggle('active', i === index);
+    });
+    renderAvatar();
+}
+
+function renderAvatar(targetId = 'avatarSvg') {
+    const svg = document.getElementById(targetId);
+    if (!svg) return;
+
+    const avatar = state.story.avatar;
+    const skinColor = AVATAR_OPTIONS.skinTones[avatar.skinTone];
+    const hairColor = AVATAR_OPTIONS.hairColors[avatar.hairColor];
+    const eyeColor = AVATAR_OPTIONS.eyeColors[avatar.eyeColor];
+    const gender = avatar.gender;
+    const hairStyle = AVATAR_OPTIONS.hairStyles[gender][avatar.hairStyle];
+    const outfit = AVATAR_OPTIONS.outfits[gender][avatar.outfit];
+    const outfitColor = AVATAR_OPTIONS.outfitColors[outfit];
+
+    // Build SVG content
+    let hairBack = '';
+    let hair = '';
+    let body = '';
+
+    // Hair back layer (for styles that go behind head)
+    if (hairStyle === 'long' || hairStyle === 'ponytail' || hairStyle === 'twintails' || hairStyle === 'braid') {
+        if (hairStyle === 'long') {
+            hairBack = `<ellipse cx="50" cy="55" rx="32" ry="40" fill="${hairColor}"/>`;
+        } else if (hairStyle === 'ponytail') {
+            hairBack = `<ellipse cx="50" cy="60" rx="8" ry="30" fill="${hairColor}"/>`;
+        } else if (hairStyle === 'twintails') {
+            hairBack = `<ellipse cx="25" cy="55" rx="8" ry="30" fill="${hairColor}"/>
+                        <ellipse cx="75" cy="55" rx="8" ry="30" fill="${hairColor}"/>`;
+        } else if (hairStyle === 'braid') {
+            hairBack = `<ellipse cx="50" cy="65" rx="6" ry="35" fill="${hairColor}"/>`;
+        }
+    }
+
+    // Body/outfit
+    body = `<ellipse cx="50" cy="105" rx="25" ry="20" fill="${outfitColor}"/>
+            <rect x="35" y="85" width="30" height="25" rx="5" fill="${outfitColor}"/>`;
+
+    // Add outfit details
+    if (outfit === 'knight') {
+        body += `<rect x="42" y="90" width="16" height="20" fill="#A0A0A0"/>
+                 <circle cx="50" cy="95" r="3" fill="#FFD700"/>`;
+    } else if (outfit === 'mage') {
+        body += `<path d="M 50 90 L 55 100 L 45 100 Z" fill="#FFD700"/>`;
+    } else if (outfit === 'noble') {
+        body += `<rect x="43" y="90" width="14" height="15" fill="#8B0000"/>
+                 <circle cx="50" cy="95" r="2" fill="#FFD700"/>`;
+    }
+
+    // Face
+    const face = `<ellipse cx="50" cy="45" rx="22" ry="25" fill="${skinColor}"/>`;
+
+    // Eyes
+    const eyes = `<ellipse cx="42" cy="45" rx="4" ry="5" fill="white"/>
+                  <ellipse cx="58" cy="45" rx="4" ry="5" fill="white"/>
+                  <circle cx="43" cy="45" r="3" fill="${eyeColor}"/>
+                  <circle cx="59" cy="45" r="3" fill="${eyeColor}"/>
+                  <circle cx="44" cy="44" r="1" fill="white"/>
+                  <circle cx="60" cy="44" r="1" fill="white"/>`;
+
+    // Mouth
+    const mouth = gender === 'female'
+        ? `<path d="M 45 55 Q 50 60 55 55" stroke="#D35400" fill="none" stroke-width="2"/>`
+        : `<path d="M 45 55 Q 50 58 55 55" stroke="#8B4513" fill="none" stroke-width="2"/>`;
+
+    // Hair front
+    if (hairStyle === 'short') {
+        hair = `<path d="M 28 35 Q 30 15 50 12 Q 70 15 72 35 Q 65 25 50 22 Q 35 25 28 35" fill="${hairColor}"/>`;
+    } else if (hairStyle === 'spiky') {
+        hair = `<path d="M 28 38 L 35 10 L 40 30 L 50 5 L 60 30 L 65 10 L 72 38 Q 50 25 28 38" fill="${hairColor}"/>`;
+    } else if (hairStyle === 'long' || hairStyle === 'ponytail' || hairStyle === 'twintails' || hairStyle === 'braid') {
+        hair = `<path d="M 28 40 Q 30 15 50 12 Q 70 15 72 40 Q 65 30 50 27 Q 35 30 28 40" fill="${hairColor}"/>
+                <path d="M 28 40 Q 25 45 25 55" stroke="${hairColor}" stroke-width="8" fill="none" stroke-linecap="round"/>
+                <path d="M 72 40 Q 75 45 75 55" stroke="${hairColor}" stroke-width="8" fill="none" stroke-linecap="round"/>`;
+    } else if (hairStyle === 'mohawk') {
+        hair = `<path d="M 45 5 Q 50 0 55 5 L 55 30 Q 50 25 45 30 Z" fill="${hairColor}"/>`;
+    } else if (hairStyle === 'bun') {
+        hair = `<path d="M 28 38 Q 30 15 50 12 Q 70 15 72 38 Q 65 28 50 25 Q 35 28 28 38" fill="${hairColor}"/>
+                <circle cx="50" cy="10" r="10" fill="${hairColor}"/>`;
+    } else if (hairStyle === 'bald') {
+        hair = '';
+    }
+
+    // Ears
+    const ears = `<ellipse cx="28" cy="47" rx="5" ry="7" fill="${skinColor}"/>
+                  <ellipse cx="72" cy="47" rx="5" ry="7" fill="${skinColor}"/>`;
+
+    svg.innerHTML = `${hairBack}${body}${ears}${face}${eyes}${mouth}${hair}`;
+}
+
+function updateMiniAvatar() {
+    renderAvatar('miniAvatarSvg');
 }
 
 function getCurrentScene() {
@@ -774,6 +1298,13 @@ function updateStoryDisplay() {
 
     // Items
     invItems.textContent = state.story.items.length > 0 ? state.story.items.join(', ') : 'None';
+
+    // Scene background
+    const storyScene = document.getElementById('storyScene');
+    storyScene.className = 'story-scene';
+    if (scene.sceneType) {
+        storyScene.classList.add('scene-' + scene.sceneType);
+    }
 
     // Scene
     sceneImage.textContent = scene.image;
@@ -827,23 +1358,41 @@ function storyFlip() {
 function applyStoryResult(result, isHeads) {
     // Show result text
     createConfetti(isHeads);
-    playResultSound();
+
+    // Play appropriate sound effect based on result
+    if (result.soundEffect) {
+        switch (result.soundEffect) {
+            case 'battle': playBattleSound(); break;
+            case 'magic': playMagicSound(); break;
+            case 'damage': playDamageSound(); break;
+            case 'item': playItemSound(); break;
+            case 'victory': playVictorySound(); break;
+            case 'chapter': playChapterSound(); break;
+            case 'dragon': playDragonSound(); break;
+            default: playResultSound();
+        }
+    } else {
+        playResultSound();
+    }
 
     // Apply stat changes
     if (result.health) {
         state.story.health = Math.max(0, Math.min(state.story.maxHealth, state.story.health + result.health));
+        if (result.health < 0) playDamageSound();
     }
     if (result.reputation) {
         state.story.reputation = Math.max(0, Math.min(100, state.story.reputation + result.reputation));
     }
     if (result.gold) {
         state.story.gold = Math.max(0, state.story.gold + result.gold);
+        if (result.gold > 0) playItemSound();
     }
     if (result.battlesWon) {
         state.story.battlesWon += result.battlesWon;
     }
     if (result.item && !state.story.items.includes(result.item)) {
         state.story.items.push(result.item);
+        playItemSound();
     }
     if (result.flag) {
         state.story.flags[result.flag] = true;
@@ -856,6 +1405,7 @@ function applyStoryResult(result, isHeads) {
     if (state.story.health <= 0) {
         state.story.deaths++;
         state.story.health = state.story.maxHealth;
+        playDeathSound();
         showStoryMascotMessage("You have fallen... but fate gives you another chance!");
     }
 
@@ -863,6 +1413,7 @@ function applyStoryResult(result, isHeads) {
     setTimeout(() => {
         if (result.nextChapter !== undefined) {
             state.story.chapter = result.nextChapter;
+            playChapterSound();
         }
         state.story.currentSceneId = result.nextScene;
 
@@ -871,6 +1422,17 @@ function applyStoryResult(result, isHeads) {
             triggerEnding(nextScene);
         } else {
             updateStoryDisplay();
+            // Play scene entry sound
+            if (nextScene && nextScene.soundType) {
+                setTimeout(() => {
+                    switch (nextScene.soundType) {
+                        case 'battle': playBattleSound(); break;
+                        case 'magic': playMagicSound(); break;
+                        case 'dragon': playDragonSound(); break;
+                        case 'dramatic': playDramaticSound(); break;
+                    }
+                }, 500);
+            }
         }
 
         saveState();
@@ -883,8 +1445,10 @@ function triggerEnding(scene) {
     // Mark ending as found
     if (!state.story.endingsFound.includes(scene.endingId)) {
         state.story.endingsFound.push(scene.endingId);
-        playVictorySound();
     }
+
+    // Play ending fanfare
+    playEndingFanfare();
 
     // Show ending popup
     endingIcon.textContent = ending.icon;
