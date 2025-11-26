@@ -3,56 +3,201 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kawaii Coin Flipper ★</title>
+    <title>Kawaii Coin Flipper ★ The Ultimate Flip Experience</title>
+    <meta name="description" content="The cutest coin flipper on the internet! Flip coins with beautiful animations, track your luck, earn achievements, and share with friends!">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🪙</text></svg>">
 </head>
 <body>
-    <div class="sparkles">
-        <span class="sparkle">✦</span>
-        <span class="sparkle">✧</span>
-        <span class="sparkle">★</span>
-        <span class="sparkle">✦</span>
-        <span class="sparkle">✧</span>
-        <span class="sparkle">★</span>
-        <span class="sparkle">✦</span>
-        <span class="sparkle">✧</span>
-    </div>
+    <!-- Floating sparkles background -->
+    <div class="sparkles" id="sparkles"></div>
+
+    <!-- Confetti container -->
+    <div class="confetti-container" id="confetti"></div>
+
+    <!-- Theme toggle -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle Dark Mode">
+        <span class="theme-icon">🌙</span>
+    </button>
+
+    <!-- Sound toggle -->
+    <button class="sound-toggle" id="soundToggle" title="Toggle Sound">
+        <span class="sound-icon">🔊</span>
+    </button>
 
     <div class="container">
-        <h1>✧ Coin Flipper ✧</h1>
-        <p class="subtitle">~ Make a wish! ~</p>
+        <header class="header">
+            <h1>✧ Kawaii Coin Flipper ✧</h1>
+            <p class="subtitle">~ Make a wish and flip! ~</p>
+        </header>
 
-        <div class="coin-container">
-            <div class="coin" id="coin">
-                <div class="side heads">
-                    <span class="coin-face">★</span>
-                    <span class="coin-text">HEADS</span>
-                </div>
-                <div class="side tails">
-                    <span class="coin-face">♡</span>
-                    <span class="coin-text">TAILS</span>
+        <!-- Coin theme selector -->
+        <div class="theme-selector">
+            <span class="theme-label">Coin Style:</span>
+            <div class="coin-themes">
+                <button class="coin-theme-btn active" data-theme="kawaii" title="Kawaii">💖</button>
+                <button class="coin-theme-btn" data-theme="gold" title="Classic Gold">🪙</button>
+                <button class="coin-theme-btn" data-theme="galaxy" title="Galaxy">🌌</button>
+                <button class="coin-theme-btn" data-theme="neon" title="Neon">💜</button>
+                <button class="coin-theme-btn" data-theme="sakura" title="Sakura">🌸</button>
+            </div>
+        </div>
+
+        <!-- Main coin area -->
+        <div class="coin-area">
+            <div class="coin-glow"></div>
+            <div class="coin-container">
+                <div class="coin" id="coin">
+                    <div class="side heads">
+                        <span class="coin-face" id="headsFace">★</span>
+                        <span class="coin-text">HEADS</span>
+                    </div>
+                    <div class="side tails">
+                        <span class="coin-face" id="tailsFace">♡</span>
+                        <span class="coin-text">TAILS</span>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <button class="flip-btn" id="flipBtn" onclick="flipCoin()">
-            ✧ Flip! ✧
+        <!-- Flip button -->
+        <button class="flip-btn" id="flipBtn">
+            <span class="btn-sparkle">✧</span>
+            <span class="btn-text">Flip!</span>
+            <span class="btn-sparkle">✧</span>
         </button>
 
-        <div class="result" id="result"></div>
-
-        <div class="stats">
-            <h3>♡ Statistics ♡</h3>
-            <p>★ Heads: <span id="headsCount">0</span></p>
-            <p>♡ Tails: <span id="tailsCount">0</span></p>
-            <p>✧ Total: <span id="totalFlips">0</span></p>
-            <button class="reset-btn" onclick="resetStats()">Reset ↺</button>
+        <!-- Quick flip options -->
+        <div class="quick-flips">
+            <button class="quick-flip-btn" data-flips="5">5x Flip</button>
+            <button class="quick-flip-btn" data-flips="10">10x Flip</button>
+            <button class="quick-flip-btn" data-flips="100">100x Flip</button>
         </div>
 
-        <div class="cute-mascot">( ˶ˆᗜˆ˵ )</div>
+        <!-- Result display -->
+        <div class="result-area">
+            <div class="result" id="result"></div>
+            <div class="streak" id="streak"></div>
+        </div>
+
+        <!-- Statistics panel -->
+        <div class="stats-panel">
+            <h3>♡ Statistics ♡</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-icon">★</span>
+                    <span class="stat-label">Heads</span>
+                    <span class="stat-value" id="headsCount">0</span>
+                    <span class="stat-percent" id="headsPercent">0%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-icon">♡</span>
+                    <span class="stat-label">Tails</span>
+                    <span class="stat-value" id="tailsCount">0</span>
+                    <span class="stat-percent" id="tailsPercent">0%</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-icon">✧</span>
+                    <span class="stat-label">Total</span>
+                    <span class="stat-value" id="totalFlips">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-icon">🔥</span>
+                    <span class="stat-label">Best Streak</span>
+                    <span class="stat-value" id="bestStreak">0</span>
+                </div>
+            </div>
+            <div class="stats-bar">
+                <div class="bar-heads" id="barHeads"></div>
+                <div class="bar-tails" id="barTails"></div>
+            </div>
+            <button class="reset-btn" id="resetBtn">Reset Stats ↺</button>
+        </div>
+
+        <!-- Achievements -->
+        <div class="achievements-panel">
+            <h3>🏆 Achievements</h3>
+            <div class="achievements-grid" id="achievements">
+                <div class="achievement locked" data-id="first-flip" title="First Flip - Flip your first coin">
+                    <span class="achievement-icon">🌟</span>
+                    <span class="achievement-name">First Flip</span>
+                </div>
+                <div class="achievement locked" data-id="ten-flips" title="Getting Started - Flip 10 coins">
+                    <span class="achievement-icon">🎯</span>
+                    <span class="achievement-name">10 Flips</span>
+                </div>
+                <div class="achievement locked" data-id="hundred-flips" title="Dedicated - Flip 100 coins">
+                    <span class="achievement-icon">💯</span>
+                    <span class="achievement-name">100 Flips</span>
+                </div>
+                <div class="achievement locked" data-id="thousand-flips" title="Coin Master - Flip 1000 coins">
+                    <span class="achievement-icon">👑</span>
+                    <span class="achievement-name">1000 Flips</span>
+                </div>
+                <div class="achievement locked" data-id="streak-5" title="Lucky! - Get 5 same results in a row">
+                    <span class="achievement-icon">🍀</span>
+                    <span class="achievement-name">5 Streak</span>
+                </div>
+                <div class="achievement locked" data-id="streak-10" title="On Fire! - Get 10 same results in a row">
+                    <span class="achievement-icon">🔥</span>
+                    <span class="achievement-name">10 Streak</span>
+                </div>
+                <div class="achievement locked" data-id="perfect-balance" title="Perfectly Balanced - Get exactly 50/50 after 100 flips">
+                    <span class="achievement-icon">⚖️</span>
+                    <span class="achievement-name">Balance</span>
+                </div>
+                <div class="achievement locked" data-id="night-owl" title="Night Owl - Flip at midnight">
+                    <span class="achievement-icon">🦉</span>
+                    <span class="achievement-name">Night Owl</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- History -->
+        <div class="history-panel">
+            <h3>📜 Recent Flips</h3>
+            <div class="history-list" id="history"></div>
+            <button class="clear-history-btn" id="clearHistory">Clear History</button>
+        </div>
+
+        <!-- Share section -->
+        <div class="share-panel">
+            <h3>📤 Share Your Luck!</h3>
+            <button class="share-btn" id="shareBtn">
+                <span>Share Results</span>
+            </button>
+            <button class="copy-btn" id="copyBtn">
+                <span>📋 Copy Stats</span>
+            </button>
+        </div>
+
+        <!-- Fun facts -->
+        <div class="fun-fact" id="funFact">
+            <span class="fact-icon">💡</span>
+            <span class="fact-text">Did you know? A coin has about a 51% chance of landing on the side it started on!</span>
+        </div>
+
+        <!-- Mascot -->
+        <div class="mascot-area">
+            <div class="mascot" id="mascot">( ˶ˆᗜˆ˵ )</div>
+            <div class="mascot-speech" id="mascotSpeech">Good luck!</div>
+        </div>
+
+        <footer class="footer">
+            <p>Made with 💖 | Press <kbd>Space</kbd> to flip!</p>
+        </footer>
+    </div>
+
+    <!-- Achievement popup -->
+    <div class="achievement-popup" id="achievementPopup">
+        <div class="achievement-popup-content">
+            <span class="popup-icon" id="popupIcon">🏆</span>
+            <span class="popup-title">Achievement Unlocked!</span>
+            <span class="popup-name" id="popupName"></span>
+        </div>
     </div>
 
     <script src="script.js"></script>
