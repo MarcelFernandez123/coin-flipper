@@ -39,8 +39,8 @@
     <div class="container story-container" id="storyMode">
         <!-- Story Header -->
         <header class="story-header">
-            <h1>⚔️ Fate Flipper ⚔️</h1>
-            <p class="story-tagline">Every flip decides your destiny</p>
+            <h1>KINGDOM OF HEARTS</h1>
+            <p class="story-tagline">Where Light Meets Darkness</p>
         </header>
 
         <!-- Character Status Bar -->
@@ -62,30 +62,38 @@
             </div>
             <div class="status-bars">
                 <div class="bar-container">
-                    <span class="bar-label">❤️ Health</span>
+                    <span class="bar-label">💚 HP</span>
                     <div class="status-bar health-bar">
                         <div class="bar-fill health-fill" id="healthBar" style="width: 100%"></div>
                     </div>
                     <span class="bar-value" id="healthValue">100/100</span>
                 </div>
                 <div class="bar-container">
-                    <span class="bar-label">⭐ Reputation</span>
+                    <span class="bar-label">💙 MP</span>
                     <div class="status-bar rep-bar">
                         <div class="bar-fill rep-fill" id="repBar" style="width: 50%"></div>
                     </div>
                     <span class="bar-value" id="repValue">50/100</span>
                 </div>
                 <div class="bar-container">
-                    <span class="bar-label">💰 Gold</span>
+                    <span class="bar-label">✨ EXP</span>
                     <div class="status-bar gold-bar">
-                        <div class="bar-fill gold-fill" id="goldBar" style="width: 20%"></div>
+                        <div class="bar-fill gold-fill" id="expBar" style="width: 0%"></div>
                     </div>
-                    <span class="bar-value" id="goldValue">20</span>
+                    <span class="bar-value" id="expValue">Lv.1</span>
                 </div>
             </div>
             <div class="inventory" id="inventory">
-                <span class="inv-label">🎒 Items:</span>
-                <span class="inv-items" id="invItems">None</span>
+                <span class="inv-label">🗝️ Keyblade:</span>
+                <span class="inv-items" id="keybladeDisplay">Kingdom Key</span>
+            </div>
+            <div class="inventory">
+                <span class="inv-label">💫 Abilities:</span>
+                <span class="inv-items" id="abilitiesDisplay">None</span>
+            </div>
+            <div class="inventory">
+                <span class="inv-label">💰 Munny:</span>
+                <span class="inv-items" id="munnyDisplay">0</span>
             </div>
         </div>
 
@@ -97,32 +105,32 @@
             </div>
         </div>
 
-        <!-- Choice Display -->
+        <!-- Choice Display - KH Command Menu Style -->
         <div class="choice-display" id="choiceDisplay">
-            <div class="choice heads-choice">
-                <span class="choice-icon">⚔️</span>
-                <span class="choice-label">FATE</span>
-                <span class="choice-text" id="headsChoice">Brave path</span>
+            <div class="choice heads-choice kh-choice">
+                <span class="choice-icon">💖</span>
+                <span class="choice-label">LIGHT</span>
+                <span class="choice-text" id="headsChoice">Follow your heart</span>
             </div>
-            <div class="choice tails-choice">
-                <span class="choice-icon">🛡️</span>
-                <span class="choice-label">DESTINY</span>
-                <span class="choice-text" id="tailsChoice">Cautious path</span>
+            <div class="choice tails-choice kh-choice">
+                <span class="choice-icon">🖤</span>
+                <span class="choice-label">DARKNESS</span>
+                <span class="choice-text" id="tailsChoice">Embrace the shadows</span>
             </div>
         </div>
 
-        <!-- Coin Area -->
+        <!-- Coin Area - Heart of Light/Darkness -->
         <div class="coin-area">
-            <div class="coin-glow"></div>
+            <div class="coin-glow kh-glow"></div>
             <div class="coin-container">
-                <div class="coin story-coin" id="storyCoin">
+                <div class="coin story-coin kh-coin" id="storyCoin">
                     <div class="side heads">
-                        <span class="coin-face">⚔️</span>
-                        <span class="coin-text">FATE</span>
+                        <span class="coin-face">💖</span>
+                        <span class="coin-text">LIGHT</span>
                     </div>
                     <div class="side tails">
-                        <span class="coin-face">🛡️</span>
-                        <span class="coin-text">DESTINY</span>
+                        <span class="coin-face">🖤</span>
+                        <span class="coin-text">DARK</span>
                     </div>
                 </div>
             </div>
@@ -130,9 +138,9 @@
 
         <!-- Flip Button -->
         <button class="flip-btn story-flip-btn" id="storyFlipBtn">
-            <span class="btn-sparkle">⚔️</span>
-            <span class="btn-text">Flip Your Fate!</span>
-            <span class="btn-sparkle">🛡️</span>
+            <span class="btn-sparkle">🗝️</span>
+            <span class="btn-text">COMMAND</span>
+            <span class="btn-sparkle">💫</span>
         </button>
 
         <!-- Story Progress -->
@@ -144,22 +152,22 @@
             <div class="progress-chapters" id="progressChapters"></div>
         </div>
 
-        <!-- Story Stats -->
+        <!-- Story Stats - KH Style -->
         <div class="story-stats">
             <div class="story-stat">
-                <span class="stat-icon">⚔️</span>
-                <span class="stat-label">Battles Won</span>
-                <span class="stat-value" id="battlesWon">0</span>
+                <span class="stat-icon">👤</span>
+                <span class="stat-label">Heartless</span>
+                <span class="stat-value" id="heartlessDefeated">0</span>
             </div>
             <div class="story-stat">
                 <span class="stat-icon">💀</span>
-                <span class="stat-label">Deaths</span>
+                <span class="stat-label">Fallen</span>
                 <span class="stat-value" id="deaths">0</span>
             </div>
             <div class="story-stat">
-                <span class="stat-icon">👑</span>
-                <span class="stat-label">Endings Found</span>
-                <span class="stat-value" id="endingsFound">0/5</span>
+                <span class="stat-icon">🗝️</span>
+                <span class="stat-label">Endings</span>
+                <span class="stat-value" id="endingsFound">0/7</span>
             </div>
         </div>
 

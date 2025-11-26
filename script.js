@@ -12,17 +12,30 @@ let state = {
     darkMode: false,
     soundEnabled: true,
     musicEnabled: true,
-    // Story mode
+    // Story mode - Kingdom Hearts inspired
     story: {
         heroName: '',
         chapter: 0,
         scene: 0,
-        health: 100,
-        maxHealth: 100,
-        reputation: 50,
-        gold: 20,
+        // KH Stats
+        hp: 100,
+        maxHp: 100,
+        mp: 50,
+        maxMp: 50,
+        level: 1,
+        exp: 0,
+        expToLevel: 100,
+        munny: 0,
+        // Combat stats
+        strength: 10,
+        magic: 10,
+        defense: 10,
+        // Equipment
+        keyblade: 'Kingdom Key',
+        abilities: [],
         items: [],
-        battlesWon: 0,
+        // Progress
+        heartlessDefeated: 0,
         deaths: 0,
         endingsFound: [],
         flags: {},
@@ -36,6 +49,31 @@ let state = {
             outfit: 0
         }
     }
+};
+
+// ==================== KEYBLADE DATA ====================
+const KEYBLADES = {
+    'Kingdom Key': { strength: 3, magic: 1, ability: null, description: 'The key that connects to the heart' },
+    'Oathkeeper': { strength: 3, magic: 3, ability: 'MP Haste', description: 'A bond of friendship' },
+    'Oblivion': { strength: 6, magic: 2, ability: 'Critical Plus', description: 'Memory of darkness' },
+    'Lady Luck': { strength: 2, magic: 4, ability: 'Lucky Strike', description: 'Fortune favors the bold' },
+    'Three Wishes': { strength: 4, magic: 4, ability: 'MP Rage', description: 'Mystical power' },
+    'Lionheart': { strength: 8, magic: 2, ability: 'Second Chance', description: 'Courage made manifest' },
+    'Ultima Weapon': { strength: 12, magic: 8, ability: 'MP Hastega', description: 'The ultimate key' }
+};
+
+// ==================== ABILITIES DATA ====================
+const ABILITIES = {
+    'Combo Plus': { type: 'combat', description: 'Extends ground combos' },
+    'Air Combo Plus': { type: 'combat', description: 'Extends air combos' },
+    'Critical Plus': { type: 'combat', description: 'Increases critical hit rate' },
+    'Lucky Strike': { type: 'support', description: 'Increases item drops' },
+    'MP Haste': { type: 'magic', description: 'MP recharges faster' },
+    'MP Rage': { type: 'magic', description: 'Restores MP when hit' },
+    'Second Chance': { type: 'survival', description: 'Survive fatal blow with 1 HP' },
+    'Leaf Bracer': { type: 'magic', description: 'Finish casting even when hit' },
+    'Scan': { type: 'support', description: 'See enemy HP' },
+    'Treasure Magnet': { type: 'support', description: 'Attract prizes from farther away' }
 };
 
 // ==================== CHARACTER AVATAR OPTIONS ====================
@@ -81,560 +119,673 @@ const SCENE_IMAGES = {
     victory: 'https://images.unsplash.com/photo-1533228876829-65c94e7b5025?w=400&h=200&fit=crop'
 };
 
-// ==================== STORY DATA ====================
+// ==================== STORY DATA - KINGDOM HEARTS INSPIRED ====================
 const STORY = {
     chapters: [
-        // Chapter 0: Introduction
+        // Chapter 0: Awakening
         {
-            name: "The Call to Adventure",
+            name: "Dive to the Heart",
             scenes: [
                 {
                     id: "intro",
-                    image: "🏰",
-                    sceneType: "castle",
+                    image: "💖",
+                    sceneType: "magic",
                     soundType: "dramatic",
-                    text: "The Kingdom of Luminara is in peril! The evil Sorcerer Malachar has kidnapped Queen Celestia and locked her in the Dark Tower. You are {heroName}, a humble villager who must answer the call to adventure.",
-                    headsChoice: "Accept the quest bravely",
-                    tailsChoice: "Seek more information first",
-                    headsResult: { nextScene: "brave_start", reputation: 10, text: "Your courage inspires the villagers! They cheer as you set off immediately." },
-                    tailsResult: { nextScene: "cautious_start", gold: 15, text: "The village elder rewards your wisdom with gold and valuable information." }
+                    text: "You awaken on a stained glass pillar depicting a sleeping princess. A voice echoes: 'So much to do, so little time... {heroName}, the door has opened. Will you step through?'",
+                    headsChoice: "Step forward into the light",
+                    tailsChoice: "Wait and observe",
+                    headsResult: { nextScene: "keyblade_choice", exp: 10, text: "The light embraces you. Your heart resonates with courage!" },
+                    tailsResult: { nextScene: "keyblade_choice", mp: 10, text: "You sense the darkness stirring. Knowledge flows into you." }
                 },
                 {
-                    id: "brave_start",
-                    image: "🗡️",
-                    sceneType: "village",
-                    soundType: "item",
-                    text: "At the village armory, the blacksmith offers you a choice of weapons.",
-                    headsChoice: "Take the Sword of Light",
-                    tailsChoice: "Take the Shield of Dawn",
-                    headsResult: { nextScene: "forest_entrance", item: "Sword of Light", text: "The sword glows with ancient magic!" },
-                    tailsResult: { nextScene: "forest_entrance", item: "Shield of Dawn", text: "The shield will protect you from dark magic!" }
+                    id: "keyblade_choice",
+                    image: "🗝️",
+                    sceneType: "magic",
+                    soundType: "magic",
+                    text: "Three pedestals rise before you, each holding a weapon. The voice speaks: 'Choose well. Your path begins here.'",
+                    headsChoice: "Take the Sword (Power)",
+                    tailsChoice: "Take the Staff (Magic)",
+                    headsResult: { nextScene: "shadow_battle", strength: 5, text: "The power of the warrior. Invincible courage. A sword of terrible destruction.", soundEffect: "item" },
+                    tailsResult: { nextScene: "shadow_battle", magic: 5, text: "The power of the mystic. Inner strength. A staff of wonder and ruin.", soundEffect: "magic" }
                 },
                 {
-                    id: "cautious_start",
-                    image: "📜",
-                    sceneType: "village",
-                    soundType: "dramatic",
-                    text: "The elder tells you of two paths: the Enchanted Forest or the Mountain Pass.",
-                    headsChoice: "Take the Forest path",
-                    tailsChoice: "Take the Mountain path",
-                    headsResult: { nextScene: "forest_entrance", text: "You head toward the mysterious Enchanted Forest." },
-                    tailsResult: { nextScene: "mountain_entrance", text: "You begin the treacherous climb up the mountains." }
+                    id: "shadow_battle",
+                    image: "👤",
+                    sceneType: "battle",
+                    soundType: "battle",
+                    text: "The ground shakes! Small shadow creatures emerge - Heartless! Yellow eyes gleaming in the dark. Your weapon materializes - the Kingdom Key!",
+                    headsChoice: "Attack with all your might!",
+                    tailsChoice: "Dodge and strike carefully",
+                    headsResult: { nextScene: "darkside_appear", heartlessDefeated: 3, exp: 20, text: "You slash through the Shadows! But more keep coming!", soundEffect: "battle" },
+                    tailsResult: { nextScene: "darkside_appear", heartlessDefeated: 2, exp: 15, text: "You evade their claws and counter-attack!", soundEffect: "battle" }
                 },
                 {
-                    id: "forest_entrance",
-                    image: "🌲",
-                    sceneType: "forest",
-                    soundType: "dramatic",
-                    text: "The Enchanted Forest looms before you. Strange lights flicker between the ancient trees. You hear a cry for help nearby!",
-                    headsChoice: "Rush to help immediately",
-                    tailsChoice: "Approach cautiously",
-                    headsResult: { nextChapter: 1, nextScene: "fairy_rescue", reputation: 15, text: "Your heroism leads you to discover a fairy in danger!" },
-                    tailsResult: { nextChapter: 1, nextScene: "fairy_trap", text: "Your caution reveals it might be a trap..." }
-                },
-                {
-                    id: "mountain_entrance",
-                    image: "⛰️",
-                    sceneType: "mountain",
-                    soundType: "dramatic",
-                    text: "The mountain path is steep and dangerous. You spot a cave that could provide shelter, but also hear rumors of a dragon.",
-                    headsChoice: "Explore the cave",
-                    tailsChoice: "Continue on the path",
-                    headsResult: { nextChapter: 1, nextScene: "dragon_cave", text: "You venture into the mysterious cave..." },
-                    tailsResult: { nextChapter: 1, nextScene: "mountain_pass", gold: 10, text: "You find gold coins scattered on the safe path!" }
+                    id: "darkside_appear",
+                    image: "👹",
+                    sceneType: "battle",
+                    soundType: "battle",
+                    text: "A massive darkness erupts from the ground - DARKSIDE! A giant Heartless towers before you, a heart-shaped hole in its chest. The platform begins to crack!",
+                    headsChoice: "Strike its hands!",
+                    tailsChoice: "Aim for the head!",
+                    headsResult: { nextChapter: 1, nextScene: "destiny_islands", hp: -20, heartlessDefeated: 1, exp: 50, text: "You damage it but the darkness consumes you... You fall... and awaken somewhere new.", soundEffect: "damage" },
+                    tailsResult: { nextChapter: 1, nextScene: "destiny_islands", heartlessDefeated: 1, exp: 75, text: "A critical strike! Light explodes from your Keyblade as you're pulled into a new world!", soundEffect: "victory" }
                 }
             ]
         },
-        // Chapter 1: The Journey
+        // Chapter 1: Destiny Islands
         {
-            name: "Trials and Allies",
+            name: "Destiny Islands",
             scenes: [
                 {
-                    id: "fairy_rescue",
-                    image: "🧚",
-                    sceneType: "forest",
+                    id: "destiny_islands",
+                    image: "🏝️",
+                    sceneType: "peaceful",
                     soundType: "magic",
-                    text: "A tiny fairy named Luna is trapped in a spider's web! The giant spider approaches...",
-                    headsChoice: "Fight the spider!",
-                    tailsChoice: "Distract it and free Luna",
-                    headsResult: { nextScene: "spider_battle", text: "You draw your weapon and charge!", soundEffect: "battle" },
-                    tailsResult: { nextScene: "fairy_freed", reputation: 10, item: "Fairy Dust", text: "Luna is freed and grants you magical fairy dust!", soundEffect: "magic" }
+                    text: "You awaken on a beautiful island. Waves lap at the shore. Two friends, Riku and Kairi, wave at you. 'Hey {heroName}! The raft is almost ready. Want to help?'",
+                    headsChoice: "Help build the raft",
+                    tailsChoice: "Explore the island first",
+                    headsResult: { nextScene: "raft_building", exp: 15, text: "You grab some wood and start helping!", soundEffect: "item" },
+                    tailsResult: { nextScene: "secret_place", mp: 10, text: "Something draws you to explore...", soundEffect: "magic" }
                 },
                 {
-                    id: "fairy_trap",
-                    image: "🕸️",
-                    sceneType: "forest",
-                    soundType: "battle",
-                    text: "It's an ambush! Goblins spring from the shadows, but your caution gave you time to react.",
-                    headsChoice: "Stand and fight",
-                    tailsChoice: "Try to negotiate",
-                    headsResult: { nextScene: "goblin_battle", text: "You prepare for combat!", soundEffect: "battle" },
-                    tailsResult: { nextScene: "goblin_deal", gold: -10, text: "The goblins agree to let you pass... for a price." }
+                    id: "raft_building",
+                    image: "🚣",
+                    sceneType: "peaceful",
+                    soundType: "item",
+                    text: "Riku challenges you: 'Race you to get the supplies! Winner gets to name the raft.'",
+                    headsChoice: "Accept the race!",
+                    tailsChoice: "Work together instead",
+                    headsResult: { nextScene: "race_riku", strength: 2, text: "You sprint toward the supplies!", soundEffect: "battle" },
+                    tailsResult: { nextScene: "secret_place", exp: 20, text: "Teamwork is important. Riku nods approvingly.", soundEffect: "item" }
                 },
                 {
-                    id: "spider_battle",
-                    image: "🕷️",
+                    id: "race_riku",
+                    image: "🏃",
                     sceneType: "battle",
                     soundType: "battle",
-                    text: "The giant spider attacks! Its venomous fangs gleam in the dim light.",
-                    headsChoice: "Aim for its eyes",
-                    tailsChoice: "Go for its legs",
-                    headsResult: { nextScene: "fairy_freed", battlesWon: 1, reputation: 20, text: "Critical hit! The spider is defeated!", soundEffect: "victory" },
-                    tailsResult: { nextScene: "fairy_freed", battlesWon: 1, health: -20, text: "You win but take some damage from its venom.", soundEffect: "damage" }
+                    text: "You and Riku race across the island! He's fast, but you're determined!",
+                    headsChoice: "Take the shortcut through trees",
+                    tailsChoice: "Stick to the main path",
+                    headsResult: { nextScene: "secret_place", exp: 30, munny: 50, text: "You win! 'Not bad,' Riku smirks.", soundEffect: "victory" },
+                    tailsResult: { nextScene: "secret_place", exp: 20, text: "Riku wins, but it was close!", soundEffect: "item" }
                 },
                 {
-                    id: "fairy_freed",
+                    id: "secret_place",
+                    image: "🕳️",
+                    sceneType: "mystery",
+                    soundType: "magic",
+                    text: "You find the Secret Place - a cave with strange drawings. A mysterious door stands at the back. A cloaked figure appears: 'This world has been connected... tied to the darkness.'",
+                    headsChoice: "Ask who they are",
+                    tailsChoice: "Demand they leave",
+                    headsResult: { nextScene: "ansem_warning", mp: 15, text: "'I am but a mere shell...'", soundEffect: "magic" },
+                    tailsResult: { nextScene: "ansem_warning", strength: 3, text: "The figure laughs darkly.", soundEffect: "battle" }
+                },
+                {
+                    id: "ansem_warning",
+                    image: "🌑",
+                    sceneType: "mystery",
+                    soundType: "dramatic",
+                    text: "The figure vanishes. That night, a storm like no other descends. The sky tears open! You see Riku standing on the small island, reaching toward darkness!",
+                    headsChoice: "Run to save Riku!",
+                    tailsChoice: "Find Kairi first!",
+                    headsResult: { nextScene: "riku_darkness", text: "You rush toward your friend!", soundEffect: "battle" },
+                    tailsResult: { nextScene: "kairi_search", text: "You must make sure Kairi is safe!", soundEffect: "dramatic" }
+                },
+                {
+                    id: "riku_darkness",
+                    image: "🖐️",
+                    sceneType: "battle",
+                    soundType: "battle",
+                    text: "'The door has opened, {heroName}!' Riku extends his hand. 'We can go to other worlds! Don't be afraid of the darkness!' Shadows swirl around him.",
+                    headsChoice: "Take his hand",
+                    tailsChoice: "Refuse the darkness",
+                    headsResult: { nextScene: "darkness_consumed", hp: -30, text: "Darkness engulfs you both!", soundEffect: "damage" },
+                    tailsResult: { nextScene: "keyblade_manifest", exp: 50, text: "Light bursts from your hand!", soundEffect: "magic" }
+                },
+                {
+                    id: "kairi_search",
+                    image: "👧",
+                    sceneType: "mystery",
+                    soundType: "dramatic",
+                    text: "You find Kairi in the secret place. She turns, hollow-eyed. 'Sora...' The door behind her blasts open with dark wind!",
+                    headsChoice: "Grab her hand!",
+                    tailsChoice: "Shield yourself!",
+                    headsResult: { nextScene: "kairi_vanish", text: "She reaches for you but... passes through!", soundEffect: "magic" },
+                    tailsResult: { nextScene: "keyblade_manifest", defense: 3, text: "Light shields you as chaos erupts!", soundEffect: "magic" }
+                },
+                {
+                    id: "darkness_consumed",
+                    image: "⬛",
+                    sceneType: "battle",
+                    soundType: "damage",
+                    text: "Darkness pulls you down! But a light in your heart refuses to fade. You fight back!",
+                    headsChoice: "Focus on the light within",
+                    tailsChoice: "Rage against the dark",
+                    headsResult: { nextScene: "keyblade_manifest", mp: 20, exp: 40, text: "Your heart shines bright!", soundEffect: "magic" },
+                    tailsResult: { nextScene: "keyblade_manifest", strength: 5, exp: 40, text: "Your will is unbreakable!", soundEffect: "battle" }
+                },
+                {
+                    id: "kairi_vanish",
+                    image: "💨",
+                    sceneType: "mystery",
+                    soundType: "dramatic",
+                    text: "Kairi vanishes into you! Her heart... is now in yours. The dark wind throws you outside!",
+                    headsChoice: "Search for Riku",
+                    tailsChoice: "Face the darkness head-on",
+                    headsResult: { nextScene: "keyblade_manifest", text: "You won't lose both friends!", soundEffect: "battle" },
+                    tailsResult: { nextScene: "keyblade_manifest", defense: 3, text: "You stand your ground!", soundEffect: "battle" }
+                },
+                {
+                    id: "keyblade_manifest",
+                    image: "🗝️",
+                    sceneType: "magic",
+                    soundType: "magic",
+                    text: "Light explodes from your hand! The Kingdom Key materializes - YOUR Keyblade! A massive Darkside Heartless rises from the ground!",
+                    headsChoice: "ATTACK!",
+                    tailsChoice: "Dodge and analyze",
+                    headsResult: { nextScene: "darkside_battle", strength: 3, text: "You charge with newfound power!", soundEffect: "battle" },
+                    tailsResult: { nextScene: "darkside_battle", magic: 3, text: "You study its movements...", soundEffect: "battle" }
+                },
+                {
+                    id: "darkside_battle",
+                    image: "👹",
+                    sceneType: "battle",
+                    soundType: "battle",
+                    text: "The Darkside attacks! Dark energy pools beneath its hand. Shadows spawn endlessly!",
+                    headsChoice: "Strike the hand!",
+                    tailsChoice: "Jump for the head!",
+                    headsResult: { nextChapter: 2, nextScene: "traverse_arrival", heartlessDefeated: 10, exp: 100, text: "Your Keyblade shines! The island shatters... you fall through worlds!", soundEffect: "victory" },
+                    tailsResult: { nextChapter: 2, nextScene: "traverse_arrival", heartlessDefeated: 10, exp: 120, keyblade: "Kingdom Key+", text: "CRITICAL HIT! The Darkside screams as light consumes it!", soundEffect: "victory" }
+                }
+            ]
+        },
+        // Chapter 2: Traverse Town
+        {
+            name: "Traverse Town",
+            scenes: [
+                {
+                    id: "traverse_arrival",
+                    image: "🌃",
+                    sceneType: "mystery",
+                    soundType: "magic",
+                    text: "You wake in an alleyway. This is Traverse Town - a refuge for those whose worlds were lost to darkness. Neon signs flicker. A dog named Pluto barks at you!",
+                    headsChoice: "Follow Pluto",
+                    tailsChoice: "Explore the district",
+                    headsResult: { nextScene: "meet_leon", exp: 20, text: "Pluto leads you somewhere important!", soundEffect: "item" },
+                    tailsResult: { nextScene: "heartless_alley", munny: 30, text: "You find some munny but hear skittering...", soundEffect: "item" }
+                },
+                {
+                    id: "heartless_alley",
+                    image: "👤",
+                    sceneType: "battle",
+                    soundType: "battle",
+                    text: "Shadows emerge from the walls - Heartless! They've found you!",
+                    headsChoice: "Fight them all!",
+                    tailsChoice: "Try to escape!",
+                    headsResult: { nextScene: "meet_leon", heartlessDefeated: 5, exp: 40, text: "You slash through them with your Keyblade!", soundEffect: "battle" },
+                    tailsResult: { nextScene: "meet_leon", hp: -15, text: "You run but take some hits!", soundEffect: "damage" }
+                },
+                {
+                    id: "meet_leon",
+                    image: "🦁",
+                    sceneType: "peaceful",
+                    soundType: "dramatic",
+                    text: "A man with a gunblade blocks your path. 'So you're the Keyblade's chosen one. I'm Leon. Come with me - the Heartless are attracted to you.' Behind him, a ninja girl waves!",
+                    headsChoice: "Go with Leon",
+                    tailsChoice: "Demand answers first",
+                    headsResult: { nextScene: "leon_training", exp: 30, text: "'Smart choice. Yuffie, let's go.'", soundEffect: "item" },
+                    tailsResult: { nextScene: "leon_battle", text: "'You want answers? Earn them!' He raises his blade!", soundEffect: "battle" }
+                },
+                {
+                    id: "leon_battle",
+                    image: "⚔️",
+                    sceneType: "battle",
+                    soundType: "battle",
+                    text: "Leon attacks! His gunblade techniques are fierce!",
+                    headsChoice: "Match his aggression!",
+                    tailsChoice: "Defend and counter!",
+                    headsResult: { nextScene: "leon_training", hp: -25, strength: 5, exp: 60, text: "You lose but impress him! 'Good spirit.'", soundEffect: "damage" },
+                    tailsResult: { nextScene: "leon_training", defense: 5, exp: 50, text: "You hold your ground! 'Not bad, kid.'", soundEffect: "victory" }
+                },
+                {
+                    id: "leon_training",
+                    image: "📚",
+                    sceneType: "peaceful",
+                    soundType: "magic",
+                    text: "In the hotel, Leon explains: 'Ansem studied the Heartless. When they consume a heart, they multiply. The Keyblade can seal worlds from darkness - that's why they hunt you.'",
+                    headsChoice: "Ask about Riku and Kairi",
+                    tailsChoice: "Ask how to fight Heartless",
+                    headsResult: { nextScene: "friends_info", mp: 20, text: "'Your friends... the darkness took them somewhere.'", soundEffect: "magic" },
+                    tailsResult: { nextScene: "combat_training", strength: 3, ability: "Combo Plus", text: "'I'll show you some techniques.'", soundEffect: "item" }
+                },
+                {
+                    id: "friends_info",
+                    image: "💔",
+                    sceneType: "mystery",
+                    soundType: "dramatic",
+                    text: "'Riku may have given in to darkness. Kairi... her heart might be connected to yours. To find them, you'll need to travel to other worlds.' A loud crash outside!",
+                    headsChoice: "Rush outside!",
+                    tailsChoice: "Prepare carefully first",
+                    headsResult: { nextScene: "guard_armor", text: "You burst through the door!", soundEffect: "battle" },
+                    tailsResult: { nextScene: "guard_armor", item: "Potion", hp: 30, text: "You grab supplies and head out!", soundEffect: "item" }
+                },
+                {
+                    id: "combat_training",
+                    image: "🗡️",
+                    sceneType: "battle",
+                    soundType: "battle",
+                    text: "Leon shows you advanced combat. 'Remember - strike, dodge, strike. The Keyblade responds to your heart's strength.'",
+                    headsChoice: "Practice offense",
+                    tailsChoice: "Practice defense",
+                    headsResult: { nextScene: "guard_armor", strength: 5, ability: "Air Combo Plus", text: "Your attacks become fluid!", soundEffect: "victory" },
+                    tailsResult: { nextScene: "guard_armor", defense: 5, ability: "Second Chance", text: "You learn to survive anything!", soundEffect: "victory" }
+                },
+                {
+                    id: "guard_armor",
+                    image: "🤖",
+                    sceneType: "battle",
+                    soundType: "battle",
+                    text: "A massive Heartless assembles in the square - GUARD ARMOR! Its limbs detach and attack independently! Donald Duck and Goofy arrive! 'We're looking for the key!'",
+                    headsChoice: "Team up with them!",
+                    tailsChoice: "Show them you can handle it!",
+                    headsResult: { nextScene: "guard_armor_fight", exp: 30, text: "'Let's go! Together!'", soundEffect: "magic" },
+                    tailsResult: { nextScene: "guard_armor_fight", strength: 3, text: "'Watch and learn!'", soundEffect: "battle" }
+                },
+                {
+                    id: "guard_armor_fight",
+                    image: "💥",
+                    sceneType: "battle",
+                    soundType: "battle",
+                    text: "The Guard Armor's torso spins wildly! Donald casts Fire, Goofy shields you!",
+                    headsChoice: "Attack the limbs!",
+                    tailsChoice: "Go for the body!",
+                    headsResult: { nextScene: "guard_armor_victory", heartlessDefeated: 1, exp: 80, text: "One by one, the limbs fall!", soundEffect: "battle" },
+                    tailsResult: { nextScene: "guard_armor_victory", heartlessDefeated: 1, exp: 100, hp: -20, text: "Risky but effective! Critical damage!", soundEffect: "damage" }
+                },
+                {
+                    id: "guard_armor_victory",
+                    image: "✨",
+                    sceneType: "victory",
+                    soundType: "victory",
+                    text: "The Guard Armor explodes into light! A huge heart floats upward. Donald: 'The king sent us to find you!' Goofy: 'He said the key to our survival is the Keyblade!'",
+                    headsChoice: "Join their quest",
+                    tailsChoice: "Ask about King Mickey",
+                    headsResult: { nextScene: "gummi_ship", exp: 50, text: "'Together we can stop the darkness!'", soundEffect: "chapter" },
+                    tailsResult: { nextScene: "gummi_ship", mp: 30, text: "'The King went to find the Keyblade too...'", soundEffect: "magic" }
+                },
+                {
+                    id: "gummi_ship",
+                    image: "🚀",
+                    sceneType: "peaceful",
+                    soundType: "chapter",
+                    text: "The Gummi Ship awaits! Chip and Dale have it ready. Leon: 'Find the Keyholes. Lock them to protect the worlds.' Multiple worlds appear on the map!",
+                    headsChoice: "Go to Wonderland",
+                    tailsChoice: "Go to Olympus Coliseum",
+                    headsResult: { nextChapter: 3, nextScene: "wonderland_arrival", text: "You blast off toward a curious world!", soundEffect: "chapter" },
+                    tailsResult: { nextChapter: 3, nextScene: "coliseum_arrival", text: "A world of heroes awaits!", soundEffect: "chapter" }
+                }
+            ]
+        },
+        // Chapter 3: World Hopping & Hollow Bastion
+        {
+            name: "Hollow Bastion",
+            scenes: [
+                {
+                    id: "wonderland_arrival",
+                    image: "🐰",
+                    sceneType: "mystery",
+                    soundType: "magic",
+                    text: "You fall down a rabbit hole into Wonderland! The Cheshire Cat grins: 'The shadows grow hungry here. The Queen of Hearts knows nothing of her world's danger...'",
+                    headsChoice: "Find the Queen",
+                    tailsChoice: "Search for the Keyhole",
+                    headsResult: { nextScene: "queen_hearts", exp: 40, text: "Off with their heads!", soundEffect: "dramatic" },
+                    tailsResult: { nextScene: "trickmaster", munny: 100, text: "The Keyhole is in the Bizarre Room!", soundEffect: "magic" }
+                },
+                {
+                    id: "coliseum_arrival",
+                    image: "🏛️",
+                    sceneType: "battle",
+                    soundType: "battle",
+                    text: "Olympus Coliseum! Phil the satyr scoffs: 'You wanna be a hero? You ain't ready!' But Cloud and Hercules are competing...",
+                    headsChoice: "Enter the tournament",
+                    tailsChoice: "Train with Phil first",
+                    headsResult: { nextScene: "cerberus", strength: 5, text: "Prove yourself in the arena!", soundEffect: "battle" },
+                    tailsResult: { nextScene: "cerberus", ability: "Dodge Roll", exp: 50, text: "Two words: YOU QUALIFIED!", soundEffect: "victory" }
+                },
+                {
+                    id: "queen_hearts",
+                    image: "👑",
+                    sceneType: "mystery",
+                    soundType: "dramatic",
+                    text: "The Queen accuses Alice of stealing her heart! 'Find evidence or it's OFF WITH HER HEAD!'",
+                    headsChoice: "Defend Alice",
+                    tailsChoice: "Find the real culprit",
+                    headsResult: { nextScene: "trickmaster", hp: -20, text: "The Queen is furious! Cards attack!", soundEffect: "battle" },
+                    tailsResult: { nextScene: "trickmaster", exp: 60, item: "White Trinity", text: "You expose the Heartless!", soundEffect: "magic" }
+                },
+                {
+                    id: "trickmaster",
+                    image: "🃏",
+                    sceneType: "battle",
+                    soundType: "battle",
+                    text: "The Trickmaster appears! This juggling Heartless boss towers above you, batons ablaze!",
+                    headsChoice: "Attack the legs!",
+                    tailsChoice: "Wait for it to bend down!",
+                    headsResult: { nextScene: "keyhole_sealed", heartlessDefeated: 1, exp: 150, hp: -30, text: "You hack at its legs! It stumbles!", soundEffect: "battle" },
+                    tailsResult: { nextScene: "keyhole_sealed", heartlessDefeated: 1, exp: 180, text: "Perfect timing! Critical hit to the head!", soundEffect: "victory" }
+                },
+                {
+                    id: "cerberus",
+                    image: "🐕",
+                    sceneType: "battle",
+                    soundType: "battle",
+                    text: "CERBERUS breaks free! The three-headed guardian of the Underworld attacks! Hades watches with amusement...",
+                    headsChoice: "Focus on one head!",
+                    tailsChoice: "Dodge and counter!",
+                    headsResult: { nextScene: "keyhole_sealed", heartlessDefeated: 1, exp: 200, hp: -40, text: "Brutal but effective! You win!", soundEffect: "victory" },
+                    tailsResult: { nextScene: "keyhole_sealed", heartlessDefeated: 1, exp: 180, ability: "Sonic Blade", text: "Hercules: 'Junior hero!'", soundEffect: "victory" }
+                },
+                {
+                    id: "keyhole_sealed",
+                    image: "🔐",
+                    sceneType: "magic",
+                    soundType: "magic",
+                    text: "Your Keyblade glows! A beam of light seals the world's Keyhole! This world is safe from darkness... for now. You've grown stronger!",
+                    headsChoice: "Continue to more worlds",
+                    tailsChoice: "Return to Traverse Town",
+                    headsResult: { nextScene: "riku_encounter", exp: 100, text: "The journey continues!", soundEffect: "chapter" },
+                    tailsResult: { nextScene: "riku_encounter", hp: 50, mp: 30, text: "You rest and resupply.", soundEffect: "item" }
+                },
+                {
+                    id: "riku_encounter",
+                    image: "🌑",
+                    sceneType: "mystery",
+                    soundType: "dramatic",
+                    text: "Riku appears! But something's wrong... darkness swirls around him. 'You found new friends, {heroName}? You've replaced us!' He holds Kairi's lifeless body.",
+                    headsChoice: "It's not like that!",
+                    tailsChoice: "What happened to Kairi?!",
+                    headsResult: { nextScene: "riku_confrontation", text: "'I don't need you anymore.'", soundEffect: "dramatic" },
+                    tailsResult: { nextScene: "riku_confrontation", mp: 20, text: "'Her heart is sleeping. Maleficent knows how to wake her.'", soundEffect: "magic" }
+                },
+                {
+                    id: "riku_confrontation",
+                    image: "⚔️",
+                    sceneType: "battle",
+                    soundType: "battle",
+                    text: "Riku summons Soul Eater! 'If you're not with me, you're against me!' He attacks! Donald and Goofy hesitate - the king ordered them to follow the Keyblade...",
+                    headsChoice: "Fight your friend",
+                    tailsChoice: "Try to reach him",
+                    headsResult: { nextScene: "hollow_bastion_gates", hp: -30, exp: 100, text: "You clash! The battle is fierce!", soundEffect: "battle" },
+                    tailsResult: { nextScene: "keyblade_stolen", text: "'Your heart is too weak.'", soundEffect: "damage" }
+                },
+                {
+                    id: "keyblade_stolen",
+                    image: "💔",
+                    sceneType: "battle",
+                    soundType: "damage",
+                    text: "Riku takes your Keyblade! 'The Keyblade chooses its master. And it chose ME.' Donald and Goofy... leave with him. You're alone.",
+                    headsChoice: "Fight anyway!",
+                    tailsChoice: "Find another way",
+                    headsResult: { nextScene: "hollow_bastion_gates", strength: 10, text: "You grab a wooden sword. You won't give up!", soundEffect: "battle" },
+                    tailsResult: { nextScene: "hollow_bastion_gates", magic: 10, text: "Heart is what matters, not weapons.", soundEffect: "magic" }
+                },
+                {
+                    id: "hollow_bastion_gates",
+                    image: "🏰",
+                    sceneType: "mystery",
+                    soundType: "dramatic",
+                    text: "Hollow Bastion - Maleficent's stronghold! Dark waterfalls cascade upward. Beast arrives! 'Belle is inside. I won't stop until I save her!'",
+                    headsChoice: "Team up with Beast",
+                    tailsChoice: "Scout ahead alone",
+                    headsResult: { nextScene: "bastion_climb", exp: 80, text: "Beast's strength clears the path!", soundEffect: "battle" },
+                    tailsResult: { nextScene: "bastion_climb", defense: 5, text: "You learn the layout.", soundEffect: "item" }
+                },
+                {
+                    id: "bastion_climb",
+                    image: "⬆️",
+                    sceneType: "battle",
+                    soundType: "battle",
+                    text: "Heartless swarm the rising platforms! Defenders, Wizards, Wyverns! Riku appears above with Donald and Goofy. 'Still fighting with that toy?'",
+                    headsChoice: "Challenge Riku again!",
+                    tailsChoice: "Believe in your heart",
+                    headsResult: { nextScene: "keyblade_returns", text: "You won't back down!", soundEffect: "battle" },
+                    tailsResult: { nextScene: "keyblade_returns", mp: 40, text: "My heart is my power!", soundEffect: "magic" }
+                },
+                {
+                    id: "keyblade_returns",
+                    image: "🗝️",
+                    sceneType: "magic",
+                    soundType: "magic",
+                    text: "'My friends are my power!' The Keyblade vanishes from Riku's hand and returns to YOU! Donald and Goofy rejoin! 'Sorry, {heroName}!' Riku flees in rage.",
+                    headsChoice: "Chase Riku!",
+                    tailsChoice: "Find the princesses!",
+                    headsResult: { nextChapter: 4, nextScene: "ansem_riku", exp: 100, text: "You won't let darkness take him!", soundEffect: "chapter" },
+                    tailsResult: { nextChapter: 4, nextScene: "princess_chamber", exp: 80, keyblade: "Oathkeeper", text: "The Princesses of Heart must be saved!", soundEffect: "chapter" }
+                }
+            ]
+        },
+        // Chapter 4: End of the World
+        {
+            name: "End of the World",
+            scenes: [
+                {
+                    id: "ansem_riku",
+                    image: "👤",
+                    sceneType: "mystery",
+                    soundType: "dramatic",
+                    text: "You find Riku... but it's not him anymore. 'Riku is no longer here. I am Ansem, Seeker of Darkness! Your friend gave his heart to me!' His eyes glow orange.",
+                    headsChoice: "Fight Ansem!",
+                    tailsChoice: "Try to reach Riku inside!",
+                    headsResult: { nextScene: "ansem_battle_1", exp: 100, text: "Your Keyblade clashes against his dark blade!", soundEffect: "battle" },
+                    tailsResult: { nextScene: "ansem_battle_1", mp: 50, text: "'Riku! Fight him! I know you're in there!'", soundEffect: "magic" }
+                },
+                {
+                    id: "princess_chamber",
+                    image: "👸",
+                    sceneType: "mystery",
+                    soundType: "magic",
+                    text: "The seven Princesses of Heart lie dormant! Snow White, Cinderella, Aurora, Belle, Jasmine, Alice... and Kairi! The Keyhole to darkness is almost open!",
+                    headsChoice: "Try to wake Kairi",
+                    tailsChoice: "Seal the Keyhole!",
+                    headsResult: { nextScene: "kairi_heart", text: "She doesn't wake... her heart isn't here.", soundEffect: "dramatic" },
+                    tailsResult: { nextScene: "incomplete_keyhole", text: "The Keyblade won't work! Something's missing!", soundEffect: "damage" }
+                },
+                {
+                    id: "kairi_heart",
+                    image: "💖",
+                    sceneType: "magic",
+                    soundType: "magic",
+                    text: "You realize the truth - Kairi's heart has been inside YOU all along! To free it... you'd have to release your own heart. A dark Keyblade appears that can unlock hearts.",
+                    headsChoice: "Stab yourself with the dark Keyblade",
+                    tailsChoice: "Find another way",
+                    headsResult: { nextScene: "heart_release", text: "You turn the blade on yourself...", soundEffect: "damage" },
+                    tailsResult: { nextScene: "ansem_battle_1", exp: 150, text: "There must be another way!", soundEffect: "battle" }
+                },
+                {
+                    id: "incomplete_keyhole",
+                    image: "🕳️",
+                    sceneType: "mystery",
+                    soundType: "dramatic",
+                    text: "Ansem-Riku appears! 'The Keyhole cannot be sealed while Kairi's heart sleeps within you!' He holds a dark Keyblade. 'Only this can release her!'",
+                    headsChoice: "Take the dark Keyblade",
+                    tailsChoice: "Fight Ansem-Riku first!",
+                    headsResult: { nextScene: "heart_release", text: "You take the blade and turn it on yourself.", soundEffect: "damage" },
+                    tailsResult: { nextScene: "ansem_battle_1", strength: 10, exp: 120, text: "You won't let him use you!", soundEffect: "battle" }
+                },
+                {
+                    id: "heart_release",
                     image: "✨",
                     sceneType: "magic",
                     soundType: "magic",
-                    text: "Luna the fairy is grateful! 'I will help you on your quest,' she says. 'But first, you must choose your path forward.'",
-                    headsChoice: "Go to the Mystic Lake",
-                    tailsChoice: "Visit the Witch's Hut",
-                    headsResult: { nextChapter: 2, nextScene: "mystic_lake", text: "Luna guides you to the magical lake.", soundEffect: "chapter" },
-                    tailsResult: { nextChapter: 2, nextScene: "witch_hut", text: "Perhaps the witch has useful knowledge...", soundEffect: "chapter" }
+                    text: "Light explodes from your chest! Kairi's heart returns to her! But... you begin to fade. Your heart drifts away. You become a Heartless...",
+                    headsChoice: "Hold onto your memories",
+                    tailsChoice: "Let go...",
+                    headsResult: { nextScene: "shadow_sora", mp: 100, text: "Even as a shadow, you remember...", soundEffect: "magic" },
+                    tailsResult: { nextScene: "shadow_sora", text: "Everything fades to darkness...", soundEffect: "damage" }
                 },
                 {
-                    id: "goblin_battle",
-                    image: "👺",
+                    id: "shadow_sora",
+                    image: "👤",
+                    sceneType: "mystery",
+                    soundType: "dramatic",
+                    text: "You're a Shadow! Kairi sees you among the Heartless. 'Sora? Is that... you?' She reaches out and embraces the darkness. 'I won't let you go!'",
+                    headsChoice: "Remember who you are",
+                    tailsChoice: "Fight the darkness within",
+                    headsResult: { nextScene: "restoration", exp: 200, text: "Light bursts forth! YOU RETURN!", soundEffect: "victory" },
+                    tailsResult: { nextScene: "restoration", strength: 15, text: "Your will overcomes the shadow!", soundEffect: "victory" }
+                },
+                {
+                    id: "restoration",
+                    image: "🌟",
+                    sceneType: "victory",
+                    soundType: "victory",
+                    text: "You're human again! Kairi saved you with her light! But Ansem has fled to the End of the World - where all fallen worlds gather. It's time for the final battle!",
+                    headsChoice: "Chase Ansem immediately!",
+                    tailsChoice: "Seal Hollow Bastion first",
+                    headsResult: { nextScene: "end_of_world", text: "No time to waste!", soundEffect: "chapter" },
+                    tailsResult: { nextScene: "end_of_world", keyblade: "Oblivion", hp: 50, text: "You seal the Keyhole and receive Oblivion!", soundEffect: "magic" }
+                },
+                {
+                    id: "ansem_battle_1",
+                    image: "⚔️",
                     sceneType: "battle",
                     soundType: "battle",
-                    text: "Five goblins surround you! This will be tough...",
-                    headsChoice: "Use a battle cry to intimidate",
-                    tailsChoice: "Fight defensively",
-                    headsResult: { nextScene: "goblin_victory", battlesWon: 1, reputation: 15, text: "Your fierce cry scatters three goblins! You defeat the rest.", soundEffect: "victory" },
-                    tailsResult: { nextScene: "goblin_victory", battlesWon: 1, health: -15, text: "You win but sustain injuries.", soundEffect: "damage" }
+                    text: "You battle Ansem-Riku! Dark energy and light clash! 'Darkness conquers all worlds!' But deep inside, Riku is fighting too!",
+                    headsChoice: "Overpower him!",
+                    tailsChoice: "Call out to Riku!",
+                    headsResult: { nextScene: "end_of_world", heartlessDefeated: 1, exp: 200, hp: -50, text: "You win! Riku regains control briefly: 'Go! I'll hold him!'", soundEffect: "victory" },
+                    tailsResult: { nextScene: "end_of_world", heartlessDefeated: 1, exp: 250, text: "Riku fights back! 'I won't give in!' He holds the door!", soundEffect: "victory" }
                 },
                 {
-                    id: "goblin_deal",
-                    image: "💰",
-                    sceneType: "forest",
-                    soundType: "item",
-                    text: "The goblin chief laughs. 'Smart human! We tell you secret - witch in forest knows way to Dark Tower.'",
-                    headsChoice: "Thank them and leave",
-                    tailsChoice: "Ask for more information",
-                    headsResult: { nextChapter: 2, nextScene: "witch_hut", text: "You head to find the witch.", soundEffect: "chapter" },
-                    tailsResult: { nextChapter: 2, nextScene: "witch_hut", gold: -5, item: "Goblin Map", text: "For more gold, they give you a map!", soundEffect: "item" }
-                },
-                {
-                    id: "goblin_victory",
-                    image: "⚔️",
-                    sceneType: "battle",
-                    soundType: "victory",
-                    text: "The goblins flee! Among their belongings you find a crude map.",
-                    headsChoice: "Follow the map",
-                    tailsChoice: "Ignore it and continue",
-                    headsResult: { nextChapter: 2, nextScene: "hidden_shrine", item: "Goblin Map", text: "The map reveals a hidden location!", soundEffect: "item" },
-                    tailsResult: { nextChapter: 2, nextScene: "witch_hut", text: "You continue on the main path.", soundEffect: "chapter" }
-                },
-                {
-                    id: "dragon_cave",
-                    image: "🐉",
-                    sceneType: "cave",
-                    soundType: "dragon",
-                    text: "Deep in the cave, you find a young dragon! It's injured and looks at you with fear.",
-                    headsChoice: "Help heal the dragon",
-                    tailsChoice: "Leave it alone",
-                    headsResult: { nextScene: "dragon_friend", reputation: 25, item: "Dragon Scale", text: "The dragon becomes your ally!", soundEffect: "dragon" },
-                    tailsResult: { nextChapter: 2, nextScene: "mountain_pass", text: "You leave the cave quietly." }
-                },
-                {
-                    id: "dragon_friend",
-                    image: "🐲",
-                    sceneType: "cave",
-                    soundType: "dragon",
-                    text: "The dragon, named Ember, is grateful! 'I will aid you, brave one. I know where the Dark Tower lies.'",
-                    headsChoice: "Fly directly to the tower",
-                    tailsChoice: "Gather allies first",
-                    headsResult: { nextChapter: 3, nextScene: "tower_direct", text: "Ember takes flight toward the tower!", soundEffect: "dragon" },
-                    tailsResult: { nextChapter: 2, nextScene: "mystic_lake", text: "Wisdom dictates you need more help.", soundEffect: "chapter" }
-                },
-                {
-                    id: "mountain_pass",
-                    image: "🏔️",
-                    sceneType: "mountain",
+                    id: "end_of_world",
+                    image: "🌑",
+                    sceneType: "mystery",
                     soundType: "dramatic",
-                    text: "The mountain pass is treacherous. You encounter a traveling merchant.",
-                    headsChoice: "Trade with the merchant",
-                    tailsChoice: "Continue past them",
-                    headsResult: { nextChapter: 2, nextScene: "merchant_trade", text: "The merchant has interesting wares...", soundEffect: "item" },
-                    tailsResult: { nextChapter: 2, nextScene: "witch_hut", text: "You press onward.", soundEffect: "chapter" }
-                }
-            ]
-        },
-        // Chapter 2: Gathering Power
-        {
-            name: "The Power Within",
-            scenes: [
-                {
-                    id: "mystic_lake",
-                    image: "🌊",
-                    text: "The Mystic Lake shimmers with ethereal light. A spirit rises from the water. 'Prove your worth, hero.'",
-                    headsChoice: "Accept the spirit's challenge",
-                    tailsChoice: "Offer a gift instead",
-                    headsResult: { nextScene: "spirit_challenge", text: "The spirit creates an illusion to test you." },
-                    tailsResult: { nextScene: "spirit_gift", gold: -15, text: "Your offering pleases the spirit." }
+                    text: "The End of the World - a void of destroyed worlds! Debris floats in endless darkness. At the center: KINGDOM HEARTS itself! Ansem waits before the door.",
+                    headsChoice: "CHARGE!",
+                    tailsChoice: "Approach cautiously",
+                    headsResult: { nextScene: "ansem_final", strength: 10, text: "No more running!", soundEffect: "battle" },
+                    tailsResult: { nextScene: "ansem_final", defense: 10, text: "You sense immense power...", soundEffect: "dramatic" }
                 },
                 {
-                    id: "spirit_challenge",
-                    image: "👻",
-                    text: "The spirit shows you your greatest fear. You must face it!",
-                    headsChoice: "Face your fear head-on",
-                    tailsChoice: "Use wisdom to overcome",
-                    headsResult: { nextScene: "spirit_blessing", reputation: 20, health: -10, text: "Through sheer will, you conquer your fear!" },
-                    tailsResult: { nextScene: "spirit_blessing", reputation: 15, text: "Your clever thinking impresses the spirit." }
-                },
-                {
-                    id: "spirit_gift",
-                    image: "🎁",
-                    text: "The spirit accepts your gift graciously.",
-                    headsChoice: "Ask for power",
-                    tailsChoice: "Ask for knowledge",
-                    headsResult: { nextScene: "spirit_blessing", item: "Spirit Amulet", text: "You receive a powerful amulet!" },
-                    tailsResult: { nextScene: "spirit_blessing", flag: "tower_secret", text: "The spirit reveals a secret entrance to the tower!" }
-                },
-                {
-                    id: "spirit_blessing",
-                    image: "💫",
-                    text: "The spirit blesses you. 'The Queen's fate rests in your hands. The Dark Tower awaits.'",
-                    headsChoice: "Head to the tower immediately",
-                    tailsChoice: "Seek the witch's help first",
-                    headsResult: { nextChapter: 3, nextScene: "tower_approach", text: "You set off toward the Dark Tower!" },
-                    tailsResult: { nextScene: "witch_hut", text: "More preparation couldn't hurt." }
-                },
-                {
-                    id: "witch_hut",
-                    image: "🏚️",
-                    text: "The witch's hut sits crookedly in a misty clearing. She cackles as you approach. 'I know why you're here...'",
-                    headsChoice: "Ask for her help directly",
-                    tailsChoice: "Offer to trade services",
-                    headsResult: { nextScene: "witch_help", gold: -20, text: "'Help costs gold, dearie!'" },
-                    tailsResult: { nextScene: "witch_quest", text: "'Do something for me first...'" }
-                },
-                {
-                    id: "witch_help",
-                    image: "🧪",
-                    text: "The witch gives you a potion. 'This will protect you from Malachar's dark magic... for a time.'",
-                    headsChoice: "Drink it now",
-                    tailsChoice: "Save it for later",
-                    headsResult: { nextChapter: 3, nextScene: "tower_approach", health: 30, flag: "magic_resist", text: "You feel power surge through you!" },
-                    tailsResult: { nextChapter: 3, nextScene: "tower_approach", item: "Magic Potion", text: "You store the potion safely." }
-                },
-                {
-                    id: "witch_quest",
-                    image: "🍄",
-                    text: "'Fetch me a Moonpetal flower from the Shadowfen. Then we'll talk.'",
-                    headsChoice: "Accept the quest",
-                    tailsChoice: "Refuse and leave",
-                    headsResult: { nextScene: "shadowfen", text: "You venture into the dangerous swamp." },
-                    tailsResult: { nextChapter: 3, nextScene: "tower_approach", reputation: -10, text: "The witch curses as you leave." }
-                },
-                {
-                    id: "shadowfen",
-                    image: "🌿",
-                    text: "The Shadowfen is dark and treacherous. You spot the Moonpetal... but something lurks nearby.",
-                    headsChoice: "Grab it quickly",
-                    tailsChoice: "Observe the danger first",
-                    headsResult: { nextScene: "swamp_monster", text: "A swamp monster attacks!" },
-                    tailsResult: { nextScene: "swamp_avoided", item: "Moonpetal Flower", text: "You avoid the creature and get the flower!" }
-                },
-                {
-                    id: "swamp_monster",
-                    image: "👹",
-                    text: "A terrible swamp creature rises from the muck!",
-                    headsChoice: "Fight the beast",
-                    tailsChoice: "Try to escape",
-                    headsResult: { nextScene: "swamp_victory", battlesWon: 1, health: -25, item: "Moonpetal Flower", text: "You defeat it but are wounded." },
-                    tailsResult: { nextScene: "swamp_avoided", health: -10, text: "You escape with minor injuries but no flower." }
-                },
-                {
-                    id: "swamp_victory",
-                    image: "🏆",
-                    text: "The monster falls! You claim the Moonpetal and return to the witch.",
-                    headsChoice: "Demand extra payment",
-                    tailsChoice: "Accept her original offer",
-                    headsResult: { nextChapter: 3, nextScene: "tower_approach", item: "Magic Potion", gold: 25, reputation: -5, text: "She reluctantly agrees." },
-                    tailsResult: { nextChapter: 3, nextScene: "tower_approach", item: "Magic Potion", reputation: 10, text: "She respects your honor and gives you extra supplies." }
-                },
-                {
-                    id: "swamp_avoided",
-                    image: "😌",
-                    text: "You make it back to the witch. She's pleased with your work.",
-                    headsChoice: "Continue on to the tower",
-                    tailsChoice: "Rest and recover first",
-                    headsResult: { nextChapter: 3, nextScene: "tower_approach", item: "Magic Potion", text: "She gives you the potion. Onward!" },
-                    tailsResult: { nextChapter: 3, nextScene: "tower_approach", health: 30, item: "Magic Potion", text: "Rest restores your strength. You're ready." }
-                },
-                {
-                    id: "hidden_shrine",
-                    image: "🛕",
-                    text: "The goblin map leads to an ancient shrine! A divine presence fills the air.",
-                    headsChoice: "Pray at the shrine",
-                    tailsChoice: "Search for treasure",
-                    headsResult: { nextChapter: 3, nextScene: "tower_approach", reputation: 25, item: "Holy Symbol", text: "You are blessed with divine protection!" },
-                    tailsResult: { nextChapter: 3, nextScene: "tower_approach", gold: 50, reputation: -15, text: "You find gold but feel guilty." }
-                },
-                {
-                    id: "merchant_trade",
-                    image: "🛒",
-                    text: "The merchant shows their wares: healing potions, a map, and a mysterious key.",
-                    headsChoice: "Buy the mysterious key (30 gold)",
-                    tailsChoice: "Buy healing potions (15 gold)",
-                    headsResult: { nextChapter: 3, nextScene: "tower_approach", gold: -30, item: "Mysterious Key", text: "The key pulses with magic..." },
-                    tailsResult: { nextChapter: 3, nextScene: "tower_approach", gold: -15, health: 40, text: "The potions restore your health!" }
-                }
-            ]
-        },
-        // Chapter 3: The Dark Tower
-        {
-            name: "The Dark Tower",
-            scenes: [
-                {
-                    id: "tower_approach",
-                    image: "🗼",
-                    text: "The Dark Tower looms against a blood-red sky. Lightning crackles around its peak. This is it.",
-                    headsChoice: "Storm the front gate",
-                    tailsChoice: "Look for another entrance",
-                    headsResult: { nextScene: "front_gate", text: "You boldly approach the main entrance!" },
-                    tailsResult: { nextScene: "secret_entrance", text: "You search for a hidden way in." }
-                },
-                {
-                    id: "tower_direct",
-                    image: "🦅",
-                    text: "Ember the dragon flies you directly to the tower's upper levels!",
-                    headsChoice: "Land on the balcony",
-                    tailsChoice: "Circle to scout first",
-                    headsResult: { nextScene: "balcony_landing", text: "You land near the Queen's prison!" },
-                    tailsResult: { nextScene: "tower_scout", text: "You spot Malachar's weaknesses from above." }
-                },
-                {
-                    id: "front_gate",
-                    image: "🚪",
-                    text: "Dark knights guard the gate! They raise their weapons.",
-                    headsChoice: "Fight through them",
-                    tailsChoice: "Try to sneak past",
-                    headsResult: { nextScene: "knight_battle", text: "Steel clashes against steel!" },
-                    tailsResult: { nextScene: "sneak_success", text: "You use the shadows to slip by." }
-                },
-                {
-                    id: "secret_entrance",
-                    image: "🕳️",
-                    text: "You find a hidden passage! It's dark and may be trapped.",
-                    headsChoice: "Proceed carefully",
-                    tailsChoice: "Light a torch",
-                    headsResult: { nextScene: "trap_avoided", text: "Your caution pays off - you spot and avoid traps!" },
-                    tailsResult: { nextScene: "trap_sprung", health: -15, text: "The light reveals you to magical guardians!" }
-                },
-                {
-                    id: "knight_battle",
-                    image: "⚔️",
-                    text: "The dark knights are formidable foes!",
-                    headsChoice: "Use all your strength",
-                    tailsChoice: "Fight smart, not hard",
-                    headsResult: { nextScene: "tower_interior", battlesWon: 1, health: -20, text: "Victory! But you're wounded." },
-                    tailsResult: { nextScene: "tower_interior", battlesWon: 1, text: "Your strategy wins the day!" }
-                },
-                {
-                    id: "sneak_success",
-                    image: "🤫",
-                    text: "You slip past the guards and enter the tower unseen.",
-                    headsChoice: "Continue stealthily",
-                    tailsChoice: "Prepare for combat",
-                    headsResult: { nextScene: "tower_interior", reputation: 5, text: "Your stealth serves you well." },
-                    tailsResult: { nextScene: "tower_interior", text: "Weapons ready, you proceed." }
-                },
-                {
-                    id: "trap_avoided",
-                    image: "✅",
-                    text: "You navigate the traps and emerge inside the tower.",
-                    headsChoice: "Head up toward the Queen",
-                    tailsChoice: "Search for useful items",
-                    headsResult: { nextScene: "tower_interior", text: "Time is of the essence!" },
-                    tailsResult: { nextScene: "tower_interior", item: "Dark Crystal", gold: 20, text: "You find valuable items!" }
-                },
-                {
-                    id: "trap_sprung",
-                    image: "⚠️",
-                    text: "Magical guardians attack! Stone golems animate around you.",
-                    headsChoice: "Destroy them",
-                    tailsChoice: "Run past them",
-                    headsResult: { nextScene: "tower_interior", battlesWon: 1, health: -15, text: "The golems crumble!" },
-                    tailsResult: { nextScene: "tower_interior", health: -10, text: "You escape but take hits." }
-                },
-                {
-                    id: "balcony_landing",
-                    image: "🏰",
-                    text: "You land on the balcony near the tower's peak. The Queen's chamber is nearby!",
-                    headsChoice: "Rush to save her",
-                    tailsChoice: "Be cautious of traps",
-                    headsResult: { nextScene: "queen_chamber", text: "You burst toward the chamber!" },
-                    tailsResult: { nextScene: "queen_chamber", reputation: 5, text: "Your caution is rewarded." }
-                },
-                {
-                    id: "tower_scout",
+                    id: "ansem_final",
                     image: "👁️",
-                    text: "From above, you see Malachar in his throne room, and the Queen in a nearby tower!",
-                    headsChoice: "Attack Malachar directly",
-                    tailsChoice: "Rescue the Queen first",
-                    headsResult: { nextScene: "malachar_battle", flag: "direct_attack", text: "You dive toward the sorcerer!" },
-                    tailsResult: { nextScene: "queen_chamber", text: "The Queen is the priority." }
+                    sceneType: "battle",
+                    soundType: "battle",
+                    text: "'Behold the endless abyss! Kingdom Hearts! Fill me with the power of DARKNESS!' Ansem merges with a massive Heartless battleship - World of Chaos!",
+                    headsChoice: "Attack the face!",
+                    tailsChoice: "Target the core!",
+                    headsResult: { nextScene: "final_battle", exp: 150, text: "You fly toward the nightmare!", soundEffect: "battle" },
+                    tailsResult: { nextScene: "final_battle", exp: 200, text: "The heart is the source!", soundEffect: "battle" }
                 },
                 {
-                    id: "tower_interior",
-                    image: "🏚️",
-                    text: "Inside the dark tower, stairs spiral upward. You hear chanting from above.",
-                    headsChoice: "Rush upward",
-                    tailsChoice: "Proceed carefully",
-                    headsResult: { nextScene: "malachar_encounter", text: "You race up the stairs!" },
-                    tailsResult: { nextScene: "queen_chamber", text: "You find a side passage to the Queen!" }
-                },
-                {
-                    id: "queen_chamber",
-                    image: "👸",
-                    text: "Queen Celestia is imprisoned in a magical cage! She looks weak but alive. 'Hero... Malachar drains my life force for power...'",
-                    headsChoice: "Break the cage immediately",
-                    tailsChoice: "Ask how to free her safely",
-                    headsResult: { nextScene: "cage_break", text: "You strike at the magical bars!" },
-                    tailsResult: { nextScene: "cage_puzzle", text: "'The lock... it requires a pure heart to open.'" }
-                },
-                {
-                    id: "cage_break",
+                    id: "final_battle",
                     image: "💥",
-                    text: "The cage shatters! But an alarm sounds - Malachar knows you're here!",
-                    headsChoice: "Face Malachar now",
-                    tailsChoice: "Escape with the Queen",
-                    headsResult: { nextChapter: 4, nextScene: "malachar_battle", text: "You prepare for the final battle!" },
-                    tailsResult: { nextChapter: 4, nextScene: "escape_attempt", text: "You grab the Queen and run!" }
+                    sceneType: "battle",
+                    soundType: "battle",
+                    text: "The battle rages across dimensions! Donald's magic blazes! Goofy shields you! Ansem screams: 'SUBMIT TO DARKNESS!'",
+                    headsChoice: "NEVER! KINGDOM HEARTS IS LIGHT!",
+                    tailsChoice: "MY FRIENDS ARE MY POWER!",
+                    headsResult: { nextScene: "kh_light", text: "The door to Kingdom Hearts opens... and LIGHT pours out!", soundEffect: "magic" },
+                    tailsResult: { nextScene: "kh_light", ability: "Trinity Limit", text: "Together, you unleash everything!", soundEffect: "victory" }
                 },
                 {
-                    id: "cage_puzzle",
-                    image: "💝",
-                    text: "You place your hand on the lock. It glows and... opens! Your pure intentions freed her.",
-                    headsChoice: "Leave quietly with the Queen",
-                    tailsChoice: "Confront Malachar",
-                    headsResult: { nextChapter: 4, nextScene: "quiet_escape", reputation: 10, text: "You sneak away with the Queen." },
-                    tailsResult: { nextChapter: 4, nextScene: "malachar_battle", reputation: 15, text: "Time to end this evil!" }
+                    id: "kh_light",
+                    image: "✨",
+                    sceneType: "magic",
+                    soundType: "victory",
+                    text: "'Light?! But... Kingdom Hearts is darkness!' 'You're wrong, Ansem. Kingdom Hearts... IS LIGHT!' The radiance destroys him! But the door must be sealed from both sides!",
+                    headsChoice: "Seal the door!",
+                    tailsChoice: "Look inside first",
+                    headsResult: { nextScene: "door_closing", exp: 300, text: "Riku and King Mickey appear on the other side!", soundEffect: "chapter" },
+                    tailsResult: { nextScene: "door_closing", mp: 100, text: "You see infinite worlds within...", soundEffect: "magic" }
                 },
                 {
-                    id: "malachar_encounter",
-                    image: "🧙‍♂️",
-                    text: "Malachar stands before his dark altar. 'Fool! You dare challenge me?' He begins casting a spell!",
-                    headsChoice: "Interrupt his spell",
-                    tailsChoice: "Defend yourself",
-                    headsResult: { nextChapter: 4, nextScene: "malachar_battle", reputation: 10, text: "You strike before he finishes!" },
-                    tailsResult: { nextChapter: 4, nextScene: "malachar_battle", health: -20, text: "His spell hits you but you survive!" }
-                }
-            ]
-        },
-        // Chapter 4: The Final Confrontation
-        {
-            name: "Destiny Revealed",
-            scenes: [
-                {
-                    id: "malachar_battle",
-                    image: "⚡",
-                    text: "Malachar's eyes glow with dark power. 'You cannot defeat me! I have drained the Queen's essence!' This is the final battle!",
-                    headsChoice: "Attack with all your might",
-                    tailsChoice: "Use your items/allies",
-                    headsResult: { nextScene: "battle_physical", text: "You charge at the dark sorcerer!" },
-                    tailsResult: { nextScene: "battle_strategy", text: "You call upon everything you've gathered!" }
-                },
-                {
-                    id: "battle_physical",
-                    image: "⚔️",
-                    text: "Your weapon clashes against his magical shields! He's powerful but you're determined!",
-                    headsChoice: "Press the attack",
-                    tailsChoice: "Look for weakness",
-                    headsResult: { nextScene: "ending_hero_sacrifice", health: -50, text: "You break through but at great cost!" },
-                    tailsResult: { nextScene: "ending_wise_victory", text: "You spot his weakness - the dark crystal!" }
-                },
-                {
-                    id: "battle_strategy",
-                    image: "🌟",
-                    text: "Your allies and items create a combined assault! Magic, friendship, and courage unite!",
-                    headsChoice: "Lead the final charge",
-                    tailsChoice: "Let your allies distract him",
-                    headsResult: { nextScene: "ending_legendary_hero", text: "You lead everyone to victory!" },
-                    tailsResult: { nextScene: "ending_team_victory", text: "Together, you overwhelm the sorcerer!" }
-                },
-                {
-                    id: "escape_attempt",
-                    image: "🏃",
-                    text: "You flee with Queen Celestia! Malachar's voice echoes: 'You cannot escape!'",
-                    headsChoice: "Find a window to jump from",
-                    tailsChoice: "Fight through the guards",
-                    headsResult: { nextScene: "ending_narrow_escape", text: "A leap of faith!" },
-                    tailsResult: { nextScene: "ending_fighting_escape", battlesWon: 1, text: "You battle your way out!" }
-                },
-                {
-                    id: "quiet_escape",
-                    image: "🌙",
-                    text: "You sneak through the shadows with the Queen. Freedom is so close...",
-                    headsChoice: "Make a run for it",
-                    tailsChoice: "Continue sneaking",
-                    headsResult: { nextScene: "ending_narrow_escape", text: "You sprint toward freedom!" },
-                    tailsResult: { nextScene: "ending_silent_hero", text: "You escape without anyone noticing." }
+                    id: "door_closing",
+                    image: "🚪",
+                    sceneType: "mystery",
+                    soundType: "dramatic",
+                    text: "Riku and King Mickey help push from the dark side! 'Take care of her.' Riku smiles. Mickey: 'There will always be a door to the light!' The door seals!",
+                    headsChoice: "Promise to find them",
+                    tailsChoice: "Say goodbye",
+                    headsResult: { nextScene: "ending_destined_hero", text: "'I'll come back for you both!'", soundEffect: "victory" },
+                    tailsResult: { nextScene: "ending_peaceful_end", text: "The worlds begin restoring...", soundEffect: "victory" }
                 },
                 // ENDINGS
                 {
-                    id: "ending_hero_sacrifice",
-                    image: "😢",
+                    id: "ending_destined_hero",
+                    image: "🗝️",
+                    sceneType: "victory",
+                    soundType: "victory",
+                    isEnding: true,
+                    endingId: "destined",
+                    text: "The worlds return! You stand with Kairi on restored Destiny Islands. She hands you her lucky charm. 'Wherever you go, I'm always with you.' A new path appears... your journey is just beginning, {heroName}."
+                },
+                {
+                    id: "ending_peaceful_end",
+                    image: "🌅",
+                    sceneType: "victory",
+                    soundType: "victory",
+                    isEnding: true,
+                    endingId: "peaceful",
+                    text: "The worlds restore one by one. Destiny Islands returns! You, Kairi, and eventually Riku reunite. The three of you watch the sunset. 'Nothing's changed, huh?' 'Nope. Nothing will.' Peace... for now."
+                },
+                {
+                    id: "ending_keyblade_master",
+                    image: "👑",
+                    sceneType: "victory",
+                    soundType: "victory",
+                    isEnding: true,
+                    endingId: "master",
+                    text: "Your mastery of light earns you the title of Keyblade Master! Yen Sid himself acknowledges your power. But new threats loom - Organization XIII, Xehanort's return... Your legend, {heroName}, will echo across the worlds!"
+                },
+                {
+                    id: "ending_friends_power",
+                    image: "🤝",
+                    sceneType: "victory",
+                    soundType: "victory",
+                    isEnding: true,
+                    endingId: "friends",
+                    text: "You proved that friendship transcends darkness. Donald, Goofy, Kairi, Riku, Leon, and everyone you met stand with you. 'My friends are my power!' becomes legendary. Together, you'll face whatever comes next!"
+                },
+                {
+                    id: "ending_darkness_within",
+                    image: "🌑",
+                    sceneType: "mystery",
+                    soundType: "dramatic",
+                    isEnding: true,
+                    endingId: "darkness",
+                    text: "Though you won, something changed in you. You felt the darkness's appeal. Like Riku, you now walk the path between light and dark. Some fear you. Others respect you. You are {heroName}, the Twilight Wielder."
+                },
+                {
+                    id: "ending_heart_sacrifice",
+                    image: "💔",
+                    sceneType: "mystery",
+                    soundType: "dramatic",
                     isEnding: true,
                     endingId: "sacrifice",
-                    text: "You defeat Malachar, but his final spell mortally wounds you. The Queen holds you as you fade. 'Your sacrifice will never be forgotten, {heroName}. You saved us all.'"
+                    text: "You saved everyone... but your heart was lost in Kingdom Hearts. Kairi never stops searching. Years later, she finds a way to reach you. 'I knew I'd find you, {heroName}.' Your story wasn't over - it was just sleeping."
                 },
                 {
-                    id: "ending_wise_victory",
-                    image: "🧠",
+                    id: "ending_nobody_path",
+                    image: "👤",
+                    sceneType: "mystery",
+                    soundType: "dramatic",
                     isEnding: true,
-                    endingId: "wise",
-                    text: "By destroying his power source, Malachar crumbles to dust! The Queen embraces you. 'Your wisdom saved the kingdom. You shall be my Royal Advisor!'"
-                },
-                {
-                    id: "ending_legendary_hero",
-                    image: "👑",
-                    isEnding: true,
-                    endingId: "king",
-                    text: "With your allies' help, you defeat Malachar in an epic battle! The Queen is so grateful, she offers you her hand in marriage. You become King {heroName}, ruler of Luminara!"
-                },
-                {
-                    id: "ending_team_victory",
-                    image: "🤝",
-                    isEnding: true,
-                    endingId: "team",
-                    text: "Your friends and allies defeat Malachar together! The kingdom celebrates its heroes. You form the Order of the Coin, legendary protectors of the realm!"
-                },
-                {
-                    id: "ending_narrow_escape",
-                    image: "🌅",
-                    isEnding: true,
-                    endingId: "escape",
-                    text: "You escape with the Queen just as the tower collapses! Malachar is buried in the rubble. 'You saved me,' the Queen says. 'Luminara is forever grateful.'"
-                },
-                {
-                    id: "ending_fighting_escape",
-                    image: "⚔️",
-                    isEnding: true,
-                    endingId: "warrior",
-                    text: "You fight through an army to save the Queen! Your legend spreads across the land. You become the Kingdom's greatest warrior, General {heroName}!"
-                },
-                {
-                    id: "ending_silent_hero",
-                    image: "🦸",
-                    isEnding: true,
-                    endingId: "shadow",
-                    text: "You save the Queen without anyone knowing. Malachar eventually falls from his own failed rituals. You become a legend - the Shadow Hero of Luminara, spoken of in whispers."
+                    endingId: "nobody",
+                    text: "When you became a Heartless, a Nobody was born - Roxas, your other half. Though you returned, Roxas lives on in the Organization. Two halves of one heart... one day you'll have to choose. The story continues in Castle Oblivion..."
                 }
             ]
         }
     ],
     endings: {
-        sacrifice: { name: "The Ultimate Sacrifice", icon: "😢", description: "Gave your life to save the kingdom" },
-        wise: { name: "The Wise Advisor", icon: "🧠", description: "Used wisdom to defeat evil" },
-        king: { name: "The New King", icon: "👑", description: "Married the Queen and ruled the kingdom" },
-        team: { name: "The Fellowship", icon: "🤝", description: "Victory through friendship" },
-        escape: { name: "The Great Escape", icon: "🌅", description: "Rescued the Queen against all odds" },
-        warrior: { name: "The Legendary Warrior", icon: "⚔️", description: "Became the kingdom's greatest fighter" },
-        shadow: { name: "The Shadow Hero", icon: "🦸", description: "Saved the day without anyone knowing" }
+        destined: { name: "The Destined Hero", icon: "🗝️", description: "Promised to find your friends across all worlds" },
+        peaceful: { name: "Peaceful Sunrise", icon: "🌅", description: "Reunited with friends on Destiny Islands" },
+        master: { name: "Keyblade Master", icon: "👑", description: "Achieved mastery of the Keyblade" },
+        friends: { name: "Power of Friendship", icon: "🤝", description: "Proved friends are your greatest power" },
+        darkness: { name: "Twilight Wielder", icon: "🌑", description: "Embraced both light and darkness" },
+        sacrifice: { name: "Sleeping Heart", icon: "💔", description: "Lost your heart to save everyone" },
+        nobody: { name: "The Other Half", icon: "👤", description: "Your Nobody continues your story" }
     }
 };
 
@@ -659,11 +810,7 @@ const healthBar = document.getElementById('healthBar');
 const healthValue = document.getElementById('healthValue');
 const repBar = document.getElementById('repBar');
 const repValue = document.getElementById('repValue');
-const goldBar = document.getElementById('goldBar');
-const goldValue = document.getElementById('goldValue');
-const invItems = document.getElementById('invItems');
 const questProgress = document.getElementById('questProgress');
-const battlesWonEl = document.getElementById('battlesWon');
 const deathsEl = document.getElementById('deaths');
 const endingsFoundEl = document.getElementById('endingsFound');
 const storyMascot = document.getElementById('storyMascot');
@@ -1549,21 +1696,42 @@ function updateStoryDisplay() {
     heroNameEl.textContent = state.story.heroName;
     currentChapterEl.textContent = state.story.chapter + 1;
 
-    // Health
-    const healthPercent = (state.story.health / state.story.maxHealth) * 100;
-    healthBar.style.width = healthPercent + '%';
-    healthValue.textContent = `${state.story.health}/${state.story.maxHealth}`;
+    // HP (Kingdom Hearts style)
+    const hpPercent = (state.story.hp / state.story.maxHp) * 100;
+    healthBar.style.width = hpPercent + '%';
+    healthValue.textContent = `${state.story.hp}/${state.story.maxHp}`;
 
-    // Reputation
-    repBar.style.width = state.story.reputation + '%';
-    repValue.textContent = state.story.reputation + '/100';
+    // MP (Kingdom Hearts style)
+    const mpPercent = (state.story.mp / state.story.maxMp) * 100;
+    repBar.style.width = mpPercent + '%';
+    repValue.textContent = `${state.story.mp}/${state.story.maxMp}`;
 
-    // Gold
-    goldBar.style.width = Math.min(state.story.gold, 100) + '%';
-    goldValue.textContent = state.story.gold;
+    // EXP Bar
+    const expBar = document.getElementById('expBar');
+    const expValue = document.getElementById('expValue');
+    if (expBar && expValue) {
+        const expPercent = (state.story.exp / state.story.expToLevel) * 100;
+        expBar.style.width = expPercent + '%';
+        expValue.textContent = `Lv.${state.story.level}`;
+    }
 
-    // Items
-    invItems.textContent = state.story.items.length > 0 ? state.story.items.join(', ') : 'None';
+    // Keyblade
+    const keybladeDisplay = document.getElementById('keybladeDisplay');
+    if (keybladeDisplay) {
+        keybladeDisplay.textContent = state.story.keyblade;
+    }
+
+    // Abilities
+    const abilitiesDisplay = document.getElementById('abilitiesDisplay');
+    if (abilitiesDisplay) {
+        abilitiesDisplay.textContent = state.story.abilities.length > 0 ? state.story.abilities.join(', ') : 'None';
+    }
+
+    // Munny
+    const munnyDisplay = document.getElementById('munnyDisplay');
+    if (munnyDisplay) {
+        munnyDisplay.textContent = state.story.munny;
+    }
 
     // Scene background
     const storyScene = document.getElementById('storyScene');
@@ -1595,8 +1763,11 @@ function updateStoryDisplay() {
     const progress = ((state.story.chapter + 1) / totalChapters) * 100;
     questProgress.style.width = progress + '%';
 
-    // Stats
-    battlesWonEl.textContent = state.story.battlesWon;
+    // Stats - Kingdom Hearts style
+    const heartlessDefeatedEl = document.getElementById('heartlessDefeated');
+    if (heartlessDefeatedEl) {
+        heartlessDefeatedEl.textContent = state.story.heartlessDefeated;
+    }
     deathsEl.textContent = state.story.deaths;
     endingsFoundEl.textContent = `${state.story.endingsFound.length}/${Object.keys(STORY.endings).length}`;
 }
@@ -1644,20 +1815,59 @@ function applyStoryResult(result, isHeads) {
         playResultSound();
     }
 
-    // Apply stat changes
-    if (result.health) {
-        state.story.health = Math.max(0, Math.min(state.story.maxHealth, state.story.health + result.health));
-        if (result.health < 0) playDamageSound();
+    // Apply stat changes - Kingdom Hearts style
+    if (result.hp) {
+        state.story.hp = Math.max(0, Math.min(state.story.maxHp, state.story.hp + result.hp));
+        if (result.hp < 0) playDamageSound();
+        if (result.hp > 0) playItemSound(); // Healing
     }
-    if (result.reputation) {
-        state.story.reputation = Math.max(0, Math.min(100, state.story.reputation + result.reputation));
+    if (result.mp) {
+        state.story.mp = Math.max(0, Math.min(state.story.maxMp, state.story.mp + result.mp));
     }
-    if (result.gold) {
-        state.story.gold = Math.max(0, state.story.gold + result.gold);
-        if (result.gold > 0) playItemSound();
+    if (result.exp) {
+        state.story.exp += result.exp;
+        // Level up check
+        while (state.story.exp >= state.story.expToLevel) {
+            state.story.exp -= state.story.expToLevel;
+            state.story.level++;
+            state.story.expToLevel = Math.floor(state.story.expToLevel * 1.5);
+            // Increase stats on level up
+            state.story.maxHp += 5;
+            state.story.hp = state.story.maxHp;
+            state.story.maxMp += 3;
+            state.story.mp = state.story.maxMp;
+            state.story.strength += 1;
+            state.story.magic += 1;
+            state.story.defense += 1;
+            playVictorySound();
+            showStoryMascotMessage(`LEVEL UP! Now Level ${state.story.level}!`);
+        }
     }
-    if (result.battlesWon) {
-        state.story.battlesWon += result.battlesWon;
+    if (result.munny) {
+        state.story.munny = Math.max(0, state.story.munny + result.munny);
+        if (result.munny > 0) playItemSound();
+    }
+    if (result.strength) {
+        state.story.strength += result.strength;
+    }
+    if (result.magic) {
+        state.story.magic += result.magic;
+    }
+    if (result.defense) {
+        state.story.defense += result.defense;
+    }
+    if (result.keyblade) {
+        state.story.keyblade = result.keyblade;
+        playItemSound();
+        showStoryMascotMessage(`New Keyblade: ${result.keyblade}!`);
+    }
+    if (result.ability && !state.story.abilities.includes(result.ability)) {
+        state.story.abilities.push(result.ability);
+        playMagicSound();
+        showStoryMascotMessage(`Learned: ${result.ability}!`);
+    }
+    if (result.heartlessDefeated) {
+        state.story.heartlessDefeated += result.heartlessDefeated;
     }
     if (result.item && !state.story.items.includes(result.item)) {
         state.story.items.push(result.item);
@@ -1670,12 +1880,13 @@ function applyStoryResult(result, isHeads) {
     // Show transition text
     showStoryMascotMessage(result.text);
 
-    // Check for death
-    if (state.story.health <= 0) {
+    // Check for death (HP reaches 0)
+    if (state.story.hp <= 0) {
         state.story.deaths++;
-        state.story.health = state.story.maxHealth;
+        state.story.hp = state.story.maxHp;
+        state.story.mp = state.story.maxMp;
         playDeathSound();
-        showStoryMascotMessage("You have fallen... but fate gives you another chance!");
+        showStoryMascotMessage("Your heart fades... but light gives you another chance!");
     }
 
     // Move to next scene
@@ -1724,10 +1935,12 @@ function triggerEnding(scene) {
     endingTitle.textContent = ending.name;
     endingText.textContent = scene.text.replace('{heroName}', state.story.heroName);
     endingStats.innerHTML = `
-        <p>⚔️ Battles Won: ${state.story.battlesWon}</p>
-        <p>💀 Deaths: ${state.story.deaths}</p>
-        <p>💰 Gold Collected: ${state.story.gold}</p>
-        <p>🎒 Items Found: ${state.story.items.length}</p>
+        <p>🗝️ Keyblade: ${state.story.keyblade}</p>
+        <p>⭐ Level: ${state.story.level}</p>
+        <p>👤 Heartless Defeated: ${state.story.heartlessDefeated}</p>
+        <p>💀 Times Fallen: ${state.story.deaths}</p>
+        <p>💰 Munny: ${state.story.munny}</p>
+        <p>💫 Abilities: ${state.story.abilities.length}</p>
     `;
 
     endingPopup.classList.add('show');
